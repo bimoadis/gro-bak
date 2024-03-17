@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "605504401363",
+    "project_id": "gro-bak",
+    "storage_bucket": "gro-bak.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:605504401363:android:517266787dc38298084926",
+        "android_client_info": {
+          "package_name": "com.example.gro_bak"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAU-FAcH5EDo8iwgN6Scd7u6lssnGlRg9Y"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
