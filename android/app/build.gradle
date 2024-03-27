@@ -27,7 +27,7 @@ apply plugin: 'com.google.gms.google-services'
 
 android {
     namespace "com.example.gro_bak"
-    compileSdk flutter.compileSdkVersion
+    compileSdk 34
     ndkVersion flutter.ndkVersion
 
     compileOptions {

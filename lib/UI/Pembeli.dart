@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -12,6 +15,21 @@ class Student extends StatefulWidget {
 }
 
 class _StudentState extends State<Student> {
+  final user = FirebaseAuth.instance.currentUser;
+
+  //documentID
+  List<String> getDocument = [];
+
+  //ger=t DoctId
+  Future getDoctId() async {
+    await FirebaseFirestore.instance
+        .collection('users')
+        .get()
+        .then((snapshot) => snapshot.docs.forEach((element) {
+              print(element.reference);
+            }));
+  }
+
   static const LatLng _pGooglePlex =
       LatLng(-7.27562362979344, 112.79377717822462);
   @override
