@@ -29,11 +29,11 @@ class _RegisterState extends State<Register> {
   bool _isObscure2 = true;
   File? file;
   var options = [
-    'Student',
-    'Teacher',
+    'Pedagang',
+    'Pembeli',
   ];
-  var _currentItemSelected = "Student";
-  var rool = "Student";
+  var _currentItemSelected = "Pembeli";
+  var rool = "Pembeli";
 
   @override
   Widget build(BuildContext context) {
@@ -289,14 +289,6 @@ class _RegisterState extends State<Register> {
                         SizedBox(
                           height: 20,
                         ),
-                        Text(
-                          "WEBFUN",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 30,
-                            color: Colors.yellowAccent[400],
-                          ),
-                        ),
                       ],
                     ),
                   ),
@@ -323,7 +315,15 @@ class _RegisterState extends State<Register> {
     FirebaseFirestore firebaseFirestore = FirebaseFirestore.instance;
     var user = _auth.currentUser;
     CollectionReference ref = FirebaseFirestore.instance.collection('users');
-    ref.doc(user!.uid).set({'email': emailController.text, 'rool': rool});
+    ref.doc(user!.uid).set({
+      'nama': '',
+      'email': emailController.text,
+      'rool': rool,
+      'phone_number': '',
+      'latitude': '',
+      'longitude': '',
+      'timestamp': Timestamp.now(),
+    });
     Navigator.pushReplacement(
         context, MaterialPageRoute(builder: (context) => LoginPage()));
   }

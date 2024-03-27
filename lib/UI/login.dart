@@ -1,8 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'Student.dart';
-import 'Teacher.dart';
+import 'Pembeli.dart';
+import 'Pedagang.dart';
 import 'register.dart';
 
 class LoginPage extends StatefulWidget {
@@ -214,37 +214,6 @@ class _LoginPageState extends State<LoginPage> {
                     SizedBox(
                       height: 15,
                     ),
-                    Text(
-                      "Made by",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 40,
-                      ),
-                    ),
-                    SizedBox(
-                      height: 5,
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          "WEB",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 30,
-                            color: Colors.blue[900],
-                          ),
-                        ),
-                        Text(
-                          "FUN",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 30,
-                            color: Colors.yellowAccent[400],
-                          ),
-                        ),
-                      ],
-                    ),
                   ],
                 ),
               ),
@@ -263,11 +232,11 @@ class _LoginPageState extends State<LoginPage> {
         .get()
         .then((DocumentSnapshot documentSnapshot) {
       if (documentSnapshot.exists) {
-        if (documentSnapshot.get('rool') == "Teacher") {
+        if (documentSnapshot.get('rool') == "Pedagang") {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (context) => Teacher(),
+              builder: (context) => Pedagang(),
             ),
           );
         } else {
