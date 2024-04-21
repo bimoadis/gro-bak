@@ -89,7 +89,8 @@ class _PedagangState extends State<Pedagang> {
   void initState() {
     super.initState();
     _gps.startPositionStream(_handlePositionStream);
-    // startTimer(); // Memanggil fungsi startTimer saat initState dipanggil
+
+    startTimer(); // Memanggil fungsi startTimer saat initState dipanggil
   }
 
   void startTimer() {

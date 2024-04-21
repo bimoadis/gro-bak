@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:gro_bak/helpers/gps.dart';
+import 'package:gro_bak/service/getLongLat.dart';
 
 import 'login.dart';
 
@@ -22,23 +23,8 @@ class _StudentState extends State<Student> {
   Position? _userPosition;
   Exception? _exception;
 
-  // DocumentID
-  List<String> getDocument = [];
-
-  // Get DocumentID
-  Future getDoctId() async {
-    await FirebaseFirestore.instance
-        .collection('users')
-        .get()
-        .then((snapshot) => snapshot.docs.forEach((element) {
-              print(element.reference);
-            }));
-  }
-
-  static const LatLng _pGooglePlex =
-      LatLng(-7.27562362979344, 112.79377717822462);
-
   Completer<GoogleMapController> _controller = Completer();
+  Set<Marker> _markers = {}; // Set of markers for the GoogleMap
 
   @override
   Widget build(BuildContext context) {
@@ -58,16 +44,10 @@ class _StudentState extends State<Student> {
       ),
       body: GoogleMap(
         initialCameraPosition: CameraPosition(
-          target: _pGooglePlex,
+          target: LatLng(-7.27562362979344, 112.79377717822462),
           zoom: 15,
         ),
-        markers: {
-          Marker(
-            markerId: MarkerId("_sourceLocation"),
-            icon: BitmapDescriptor.defaultMarker,
-            position: _pGooglePlex,
-          ),
-        },
+        markers: _markers, // Set the markers for the GoogleMap
         onMapCreated: (GoogleMapController controller) {
           _controller.complete(controller);
         },
@@ -91,6 +71,7 @@ class _StudentState extends State<Student> {
   void initState() {
     super.initState();
     _gps.startPositionStream(_handlePositionStream);
+    _addMarkersFromFirestore(); // Call the function to add markers from Firestore
   }
 
   void _handlePositionStream(Position position) async {
@@ -108,5 +89,32 @@ class _StudentState extends State<Student> {
         ),
       );
     }
+  }
+
+  void _addMarkersFromFirestore() {
+    final getLongLat = GetLongLat();
+    getLongLat.getUsersStream().listen((List<Map<String, dynamic>> users) {
+      // Iterate through the list of users and add markers to the map
+      users.forEach((user) {
+        final String fullName = user['fullName'] ?? 'Unknown';
+        final double latitude = user['latitude'];
+        final double longitude = user['longitude'];
+
+        if (latitude != null && longitude != null) {
+          setState(() {
+            _markers.add(
+              Marker(
+                markerId: MarkerId(fullName),
+                position: LatLng(latitude, longitude),
+                infoWindow: InfoWindow(
+                  title: fullName,
+                  snippet: 'Latitude: $latitude, Longitude: $longitude',
+                ),
+              ),
+            );
+          });
+        }
+      });
+    });
   }
 }

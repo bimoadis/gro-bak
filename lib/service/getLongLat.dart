@@ -1,27 +1,43 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
 
-class GetLongLat extends StatelessWidget {
-  final String documentId;
+class GetLongLat {
+  // Stream untuk mendapatkan data dari koleksi 'users' di Firestore
+  final Stream<QuerySnapshot> _usersStream =
+      FirebaseFirestore.instance.collection('users').snapshots();
 
-  GetLongLat({required this.documentId});
+  // Metode untuk mendapatkan stream pengguna yang memiliki 'rool = Pedagang'
+  Stream<List<Map<String, dynamic>>> getUsersStream() {
+    // Map untuk mengubah stream QuerySnapshot menjadi stream List<Map<String, dynamic>>
+    return _usersStream.map((snapshot) {
+      // Memfilter dokumen-dokumen yang memiliki 'rool' = 'Pedagang'
+      return snapshot.docs.where((doc) {
+        final userData = doc.data() as Map<String, dynamic>;
+        return userData['rool'] == 'Pedagang';
+      }).map((doc) {
+        final userData = doc.data() as Map<String, dynamic>;
+        final fullName = userData['email'] ?? 'Unknown';
+        final company = userData['rool'] ?? 'Unknown';
 
-  @override
-  Widget build(BuildContext context) {
-    // get collection
-    CollectionReference users = FirebaseFirestore.instance.collection('users');
-    return FutureBuilder(
-        future: users.doc(documentId).get(),
-        builder: ((context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.done) {
-            Map<String, dynamic> data =
-                snapshot.data!.data() as Map<String, dynamic>;
-            return Text('${data['longitude']},' + '' + '${data['latitude']}');
-          } else {
-            return Center(
-              child: CircularProgressIndicator(),
-            );
-          }
-        }));
+        // Mendapatkan latitude dan longitude dalam bentuk double
+        final latitude = userData['latitude'] is double
+            ? userData['latitude']
+            : userData['latitude'] != null
+                ? double.tryParse(userData['latitude'].toString())
+                : null;
+        final longitude = userData['longitude'] is double
+            ? userData['longitude']
+            : userData['longitude'] != null
+                ? double.tryParse(userData['longitude'].toString())
+                : null;
+
+        // Mengembalikan data pengguna dalam bentuk Map
+        return {
+          'fullName': fullName,
+          'company': company,
+          'latitude': latitude,
+          'longitude': longitude,
+        };
+      }).toList();
+    });
   }
 }
