@@ -24,7 +24,7 @@ class _StudentState extends State<Student> {
   Exception? _exception;
 
   Completer<GoogleMapController> _controller = Completer();
-  Set<Marker> _markers = {}; // Set of markers for the GoogleMap
+  List<Marker> _markers = []; // Change to List<Marker>
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +47,8 @@ class _StudentState extends State<Student> {
           target: LatLng(-7.27562362979344, 112.79377717822462),
           zoom: 15,
         ),
-        markers: _markers, // Set the markers for the GoogleMap
+        markers:
+            Set<Marker>.from(_markers), // Set the markers for the GoogleMap
         onMapCreated: (GoogleMapController controller) {
           _controller.complete(controller);
         },
@@ -71,7 +72,8 @@ class _StudentState extends State<Student> {
   void initState() {
     super.initState();
     _gps.startPositionStream(_handlePositionStream);
-    _addMarkersFromFirestore(); // Call the function to add markers from Firestore
+    //_addMarkersFromFirestore(); // Call the function to add markers from Firestore
+    startTimer();
   }
 
   void _handlePositionStream(Position position) async {
@@ -84,7 +86,7 @@ class _StudentState extends State<Student> {
         CameraUpdate.newCameraPosition(
           CameraPosition(
             target: LatLng(position.latitude, position.longitude),
-            zoom: 15,
+            zoom: 18,
           ),
         ),
       );
@@ -94,27 +96,37 @@ class _StudentState extends State<Student> {
   void _addMarkersFromFirestore() {
     final getLongLat = GetLongLat();
     getLongLat.getUsersStream().listen((List<Map<String, dynamic>> users) {
-      // Iterate through the list of users and add markers to the map
+      print('Received users data from Firestore: $users');
       users.forEach((user) {
-        final String fullName = user['fullName'] ?? 'Unknown';
+        final String fullName = user['fullName'];
         final double latitude = user['latitude'];
         final double longitude = user['longitude'];
 
         if (latitude != null && longitude != null) {
-          setState(() {
-            _markers.add(
-              Marker(
-                markerId: MarkerId(fullName),
-                position: LatLng(latitude, longitude),
-                infoWindow: InfoWindow(
-                  title: fullName,
-                  snippet: 'Latitude: $latitude, Longitude: $longitude',
+          bool markerExists =
+              _markers.any((marker) => marker.markerId.value == fullName);
+          if (!markerExists) {
+            setState(() {
+              _markers.add(
+                Marker(
+                  markerId: MarkerId(fullName),
+                  position: LatLng(latitude, longitude),
+                  infoWindow: InfoWindow(
+                    title: fullName,
+                    snippet: 'Lat: $latitude, Long: $longitude',
+                  ),
                 ),
-              ),
-            );
-          });
+              );
+            });
+          }
         }
       });
+    });
+  }
+
+  void startTimer() {
+    Timer.periodic(Duration(seconds: 10), (timer) {
+      _addMarkersFromFirestore();
     });
   }
 }

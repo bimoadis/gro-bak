@@ -82,6 +82,7 @@ class _PedagangState extends State<Pedagang> {
         'latitude': _userPosition?.latitude,
         'longitude': _userPosition?.longitude,
       });
+      print('Full Name: $_userPosition,');
     }
   }
 
