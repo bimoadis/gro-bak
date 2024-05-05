@@ -10,14 +10,14 @@ import 'package:gro_bak/service/getLongLat.dart';
 
 import 'login.dart';
 
-class Student extends StatefulWidget {
-  const Student({Key? key}) : super(key: key);
+class Pembeli extends StatefulWidget {
+  const Pembeli({Key? key}) : super(key: key);
 
   @override
-  State<Student> createState() => _StudentState();
+  State<Pembeli> createState() => _PembeliState();
 }
 
-class _StudentState extends State<Student> {
+class _PembeliState extends State<Pembeli> {
   final user = FirebaseAuth.instance.currentUser;
   final GPS _gps = GPS();
   Position? _userPosition;
@@ -72,8 +72,7 @@ class _StudentState extends State<Student> {
   void initState() {
     super.initState();
     _gps.startPositionStream(_handlePositionStream);
-    //_addMarkersFromFirestore(); // Call the function to add markers from Firestore
-    startTimer();
+    _addMarkersFromFirestore(); // Call directly here
   }
 
   void _handlePositionStream(Position position) async {
@@ -111,10 +110,9 @@ class _StudentState extends State<Student> {
                 Marker(
                   markerId: MarkerId(fullName),
                   position: LatLng(latitude, longitude),
-                  infoWindow: InfoWindow(
-                    title: fullName,
-                    snippet: 'Lat: $latitude, Long: $longitude',
-                  ),
+                  onTap: () {
+                    _showBottomSheet(fullName);
+                  },
                 ),
               );
             });
@@ -124,9 +122,52 @@ class _StudentState extends State<Student> {
     });
   }
 
-  void startTimer() {
-    Timer.periodic(Duration(seconds: 10), (timer) {
-      _addMarkersFromFirestore();
-    });
+  void _showBottomSheet(String fullName) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (BuildContext context) {
+        return SingleChildScrollView(
+          child: Container(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom,
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Text(
+                    fullName,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  // Add a ListView for scrollable content
+                  ListView(
+                    shrinkWrap: true,
+                    physics:
+                        NeverScrollableScrollPhysics(), // Prevent ListView from scrolling
+                    children: [
+                      Text('Additional information can be displayed here.'),
+                    ],
+                  ),
+                  SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: Text('Close'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 }
