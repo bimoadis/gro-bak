@@ -5,18 +5,18 @@ class GetLongLat {
   final Stream<QuerySnapshot> _usersStream =
       FirebaseFirestore.instance.collection('users').snapshots();
 
-  // Metode untuk mendapatkan stream pengguna yang memiliki 'rool = Pedagang'
+  // Metode untuk mendapatkan stream pengguna yang memiliki 'role = Pedagang'
   Stream<List<Map<String, dynamic>>> getUsersStream() {
     // Map untuk mengubah stream QuerySnapshot menjadi stream List<Map<String, dynamic>>
     return _usersStream.map((snapshot) {
-      // Memfilter dokumen-dokumen yang memiliki 'rool' = 'Pedagang'
+      // Memfilter dokumen-dokumen yang memiliki 'role' = 'Pedagang'
       return snapshot.docs.where((doc) {
         final userData = doc.data() as Map<String, dynamic>;
-        return userData['rool'] == 'Pedagang';
+        return userData['role'] == 'Pedagang';
       }).map((doc) {
         final userData = doc.data() as Map<String, dynamic>;
         final fullName = userData['email'] ?? 'Unknown';
-        final company = userData['rool'] ?? 'Unknown';
+        final company = userData['role'] ?? 'Unknown';
 
         // Mendapatkan latitude dan longitude dalam bentuk double
         final latitude = userData['latitude'] is double

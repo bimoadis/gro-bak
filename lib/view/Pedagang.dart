@@ -1,14 +1,15 @@
 import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:gro_bak/helpers/gps.dart';
+import 'package:gro_bak/view/widget/bottom_bar.dart';
 import 'login.dart';
 
 class Pedagang extends StatefulWidget {
-  const Pedagang({super.key});
+  const Pedagang({Key? key}) : super(key: key);
 
   @override
   State<Pedagang> createState() => _PedagangState();
@@ -18,7 +19,7 @@ class _PedagangState extends State<Pedagang> {
   final _auth = FirebaseAuth.instance;
   final GPS _gps = GPS();
   Position? _userPosition;
-  Exception? _exception;
+  int _selectedIndex = 0;
 
   void _handlePositionStream(Position position) {
     setState(() {
@@ -42,24 +43,18 @@ class _PedagangState extends State<Pedagang> {
           )
         ],
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              _userPosition != null
-                  ? 'Latitude: ${_userPosition!.latitude}'
-                  : 'Loading...',
-            ),
-            Text(
-              _userPosition != null
-                  ? 'Longitude: ${_userPosition!.longitude}'
-                  : '',
-            ),
-          ],
-        ),
-      ),
+      body: Center(),
+      // bottomNavigationBar: BottomNavBar(
+      //   selectedIndex: _selectedIndex,
+      //   onItemTapped: _onItemTapped,
+      // ),
     );
+  }
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
   }
 
   Future<void> logout(BuildContext context) async {
@@ -90,8 +85,7 @@ class _PedagangState extends State<Pedagang> {
   void initState() {
     super.initState();
     _gps.startPositionStream(_handlePositionStream);
-
-    startTimer(); // Memanggil fungsi startTimer saat initState dipanggil
+    // startTimer(); // Memanggil fungsi startTimer saat initState dipanggil
   }
 
   void startTimer() {

@@ -41,7 +41,9 @@ dependencies:
   google_maps_flutter: ^2.6.0
   geolocator: ^11.0.0
   flutter_map: ^6.1.0
-  uuid: ^4.4.0
+  fluttertoast: ^8.2.2
+  font_awesome_flutter: ^10.6.0
+  google_sign_in: ^6.1.5
 
   
 dev_dependencies:
