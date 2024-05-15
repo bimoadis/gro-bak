@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:gro_bak/repository/get_merchants.dart';
+import 'package:gro_bak/repository/getAllDataMerchant.dart';
 
 class ProfilePage extends StatefulWidget {
   @override
@@ -63,7 +63,8 @@ class _ProfilePageState extends State<ProfilePage> {
 
     final email = userMap['email'] ?? 'Unknown';
     final role = userMap['role'] ?? 'Unknown';
-    final latitude = merchantMap['nama_usaha'] ?? 'Unknown';
+    final namaUsaha = merchantMap['nama_usaha'] ?? 'Unknown';
+    final nomorTelepon = merchantMap['nomor_telepon'] ?? 'Unknown';
 
     return Center(
       child: Column(
@@ -72,7 +73,7 @@ class _ProfilePageState extends State<ProfilePage> {
           CircleAvatar(
             radius: 50,
             // You can use a network image or an asset image
-            // backgroundImage: AssetImage('assets/profile_image.jpg'),
+            backgroundImage: AssetImage('assets/images/profile-none.jpg'),
             child: Icon(Icons.person, size: 50),
           ),
           SizedBox(height: 20),
@@ -92,12 +93,18 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
           SizedBox(height: 10),
           Text(
-            'Latitude: $latitude',
+            'namaUsaha: $namaUsaha',
             style: TextStyle(
               fontSize: 16,
             ),
           ),
           SizedBox(height: 10),
+          Text(
+            'telepon: $nomorTelepon',
+            style: TextStyle(
+              fontSize: 16,
+            ),
+          ),
         ],
       ),
     );

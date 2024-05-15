@@ -1,23 +1,11 @@
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:path/path.dart';
+import 'package:path/path.dart'; // Import path.dart for basename function
 
-class FireStoreServiceAllUser {
-  final CollectionReference users =
-      FirebaseFirestore.instance.collection('users');
-  final CollectionReference merchants =
+class ServiceMerchant {
+  static CollectionReference merchantCollection =
       FirebaseFirestore.instance.collection('merchant');
-
-  // Get the user data by user ID
-  Future<DocumentSnapshot> getUserByUID(String uid) async {
-    return await users.doc(uid).get();
-  }
-
-  // Get the merchant data by user ID
-  Future<DocumentSnapshot> getMerchantByUID(String uid) async {
-    return await merchants.doc(uid).get();
-  }
 
   static Future<String> uploadImg(File imageFile) async {
     String fileName =
