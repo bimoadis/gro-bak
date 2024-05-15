@@ -31,7 +31,7 @@ class _PedagangState extends State<Pedagang> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Pedagang"),
+        title: Text("Gro-bak"),
         actions: [
           IconButton(
             onPressed: () {
@@ -44,10 +44,6 @@ class _PedagangState extends State<Pedagang> {
         ],
       ),
       body: Center(),
-      // bottomNavigationBar: BottomNavBar(
-      //   selectedIndex: _selectedIndex,
-      //   onItemTapped: _onItemTapped,
-      // ),
     );
   }
 

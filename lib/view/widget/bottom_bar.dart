@@ -1,48 +1,64 @@
 import 'package:flutter/material.dart';
 import 'package:gro_bak/view/Pedagang.dart';
+import 'package:gro_bak/view/menu_pedagang_dart';
 import 'package:gro_bak/view/pesanan_pedagang.dart';
 import 'package:gro_bak/view/profil_pedagang.dart';
 
-class BottomNavBar extends StatelessWidget {
-  final int selectedIndex;
-  final void Function(int) onItemTapped;
+class BottomNavBar extends StatefulWidget {
+  @override
+  _BottomNavBarState createState() => _BottomNavBarState();
+}
 
-  BottomNavBar({
-    required this.selectedIndex,
-    required this.onItemTapped,
-  });
+class _BottomNavBarState extends State<BottomNavBar> {
+  int _selectedIndex = 0;
 
-  // List berisi kelas-kelas halaman yang akan ditampilkan
   static List<Widget> _widgetOptions = <Widget>[
-    Pedagang(), // Halaman Pedagang
-    OrderPage(), // Halaman Pesanan
+    Pedagang(),
+    MenuPedagang(),
+    OrderPage(),
     ProfilePage(),
-    // Jika ingin menambah halaman lainnya, tambahkan di sini
-    // Contoh: ProfilePage(),
   ];
 
-  static List<Widget> get widgetOptions => _widgetOptions;
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    return BottomNavigationBar(
-      items: const <BottomNavigationBarItem>[
-        BottomNavigationBarItem(
-          icon: Icon(Icons.home),
-          label: 'Home',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.shopping_cart),
-          label: 'Orders',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.person),
-          label: 'Profile',
-        ),
-      ],
-      currentIndex: selectedIndex,
-      selectedItemColor: Colors.blue,
-      onTap: onItemTapped,
+    return Scaffold(
+      body: IndexedStack(
+        index: _selectedIndex,
+        children: _widgetOptions,
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        items: <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.shopping_cart,
+                color: _selectedIndex == 0 ? Colors.blue : Colors.grey),
+            label: 'Pesanan',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.menu,
+                color: _selectedIndex == 1 ? Colors.blue : Colors.grey),
+            label: 'Menu',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.history,
+                color: _selectedIndex == 2 ? Colors.blue : Colors.grey),
+            label: 'Riwayat',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person,
+                color: _selectedIndex == 3 ? Colors.blue : Colors.grey),
+            label: 'Profil',
+          ),
+        ],
+        currentIndex: _selectedIndex,
+        selectedItemColor: Colors.blue,
+        onTap: _onItemTapped,
+      ),
     );
   }
 }

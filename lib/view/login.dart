@@ -2,10 +2,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:gro_bak/view/widget/form_widget.dart';
+import 'package:gro_bak/view/widget/bottom_bar.dart';
 import 'Pembeli.dart';
-import 'Pedagang.dart';
 import 'register.dart';
 
 class LoginPage extends StatefulWidget {
@@ -15,7 +13,7 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   bool _isSigning = false;
-  final _formKey = GlobalKey<FormState>(); // Changed _formkey to _formKey
+  final _formKey = GlobalKey<FormState>();
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   TextEditingController _emailController = TextEditingController();
   TextEditingController _passwordController = TextEditingController();
@@ -34,8 +32,7 @@ class _LoginPageState extends State<LoginPage> {
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 15),
           child: Form(
-            // Wrap with Form widget
-            key: _formKey, // Assign the form key
+            key: _formKey,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -43,25 +40,34 @@ class _LoginPageState extends State<LoginPage> {
                   "Login",
                   style: TextStyle(fontSize: 27, fontWeight: FontWeight.bold),
                 ),
-                SizedBox(
-                  height: 30,
-                ),
-                FormContainerWidget(
+                SizedBox(height: 30),
+                TextFormField(
                   controller: _emailController,
-                  hintText: "Email",
-                  isPasswordField: false,
+                  decoration: InputDecoration(
+                    hintText: "Email",
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your email';
+                    }
+                    return null;
+                  },
                 ),
-                SizedBox(
-                  height: 10,
-                ),
-                FormContainerWidget(
+                SizedBox(height: 10),
+                TextFormField(
                   controller: _passwordController,
-                  hintText: "Password",
-                  isPasswordField: true,
+                  obscureText: true,
+                  decoration: InputDecoration(
+                    hintText: "Password",
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your password';
+                    }
+                    return null;
+                  },
                 ),
-                SizedBox(
-                  height: 30,
-                ),
+                SizedBox(height: 30),
                 GestureDetector(
                   onTap: () {
                     setState(() {
@@ -78,9 +84,7 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     child: Center(
                       child: _isSigning
-                          ? CircularProgressIndicator(
-                              color: Colors.white,
-                            )
+                          ? CircularProgressIndicator(color: Colors.white)
                           : Text(
                               "Login",
                               style: TextStyle(
@@ -91,19 +95,13 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ),
                 ),
-                SizedBox(
-                  height: 10,
-                ),
-                SizedBox(
-                  height: 20,
-                ),
+                SizedBox(height: 10),
+                SizedBox(height: 20),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text("Don't have an account?"),
-                    SizedBox(
-                      width: 5,
-                    ),
+                    SizedBox(width: 5),
                     GestureDetector(
                       onTap: () {
                         Navigator.pushReplacement(
@@ -131,7 +129,7 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  void route() {
+  void route() async {
     User? user = FirebaseAuth.instance.currentUser;
     var kk = FirebaseFirestore.instance
         .collection('users')
@@ -143,7 +141,7 @@ class _LoginPageState extends State<LoginPage> {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (context) => Pedagang(),
+              builder: (context) => BottomNavBar(),
             ),
           );
         } else {
