@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:gro_bak/helpers/gps.dart';
-import 'package:gro_bak/service/getLongLat.dart';
+import 'package:gro_bak/repository/getLongLat.dart';
 
 import 'login.dart';
 
@@ -76,20 +76,34 @@ class _PembeliState extends State<Pembeli> {
   }
 
   void _handlePositionStream(Position position) async {
-    setState(() {
-      _userPosition = position;
-    });
-    if (_controller.isCompleted) {
-      GoogleMapController controller = await _controller.future;
-      controller.animateCamera(
-        CameraUpdate.newCameraPosition(
-          CameraPosition(
-            target: LatLng(position.latitude, position.longitude),
-            zoom: 18,
-          ),
-        ),
-      );
+    if (_userPosition == null ||
+        _calculateDistance(_userPosition!, position) >= 10) {
+      setState(() {
+        _userPosition = position;
+      });
+      if (_controller.isCompleted) {
+        if (_userPosition != null) {
+          GoogleMapController controller = await _controller.future;
+          controller.animateCamera(
+            CameraUpdate.newCameraPosition(
+              CameraPosition(
+                target: LatLng(position.latitude, position.longitude),
+                zoom: 18,
+              ),
+            ),
+          );
+        }
+      }
     }
+  }
+
+  double _calculateDistance(Position pos1, Position pos2) {
+    return Geolocator.distanceBetween(
+      pos1.latitude,
+      pos1.longitude,
+      pos2.latitude,
+      pos2.longitude,
+    );
   }
 
   void _addMarkersFromFirestore() {
