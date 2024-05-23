@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gro_bak/view/Pedagang.dart';
-import 'package:gro_bak/view/menu_pedagang_dart';
+import 'package:gro_bak/view/menu_pedagang.dart';
 import 'package:gro_bak/view/pesanan_pedagang.dart';
 import 'package:gro_bak/view/profil_pedagang.dart';
 

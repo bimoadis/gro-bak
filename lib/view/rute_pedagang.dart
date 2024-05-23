@@ -7,18 +7,17 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:gro_bak/helpers/gps.dart';
 import 'package:gro_bak/repository/getLongLat.dart';
-import 'package:gro_bak/view/rute_pedagang.dart';
 
 import 'login.dart';
 
-class Pembeli extends StatefulWidget {
-  const Pembeli({Key? key}) : super(key: key);
+class RutePedagang extends StatefulWidget {
+  const RutePedagang({Key? key}) : super(key: key);
 
   @override
-  State<Pembeli> createState() => _PembeliState();
+  State<RutePedagang> createState() => _RutePedagangState();
 }
 
-class _PembeliState extends State<Pembeli> {
+class _RutePedagangState extends State<RutePedagang> {
   final user = FirebaseAuth.instance.currentUser;
   final GPS _gps = GPS();
   Position? _userPosition;
@@ -32,17 +31,8 @@ class _PembeliState extends State<Pembeli> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Gro-bak"),
-        actions: [
-          IconButton(
-            onPressed: () {
-              logout(context);
-            },
-            icon: Icon(
-              Icons.logout,
-            ),
-          )
-        ],
+        title: Text("Rute Pedagang"),
+        centerTitle: true,
       ),
       body: GoogleMap(
         initialCameraPosition: CameraPosition(
@@ -64,17 +54,6 @@ class _PembeliState extends State<Pembeli> {
     );
   }
 
-  Future<void> logout(BuildContext context) async {
-    CircularProgressIndicator();
-    await FirebaseAuth.instance.signOut();
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => LoginPage(),
-      ),
-    );
-  }
-
   @override
   void initState() {
     super.initState();
@@ -83,8 +62,7 @@ class _PembeliState extends State<Pembeli> {
   }
 
   void _handlePositionStream(Position position) async {
-    if (_userPosition == null ||
-        _calculateDistance(_userPosition!, position) >= 10) {
+    if (_userPosition == null) {
       setState(() {
         _userPosition = position;
       });
@@ -102,15 +80,6 @@ class _PembeliState extends State<Pembeli> {
         }
       }
     }
-  }
-
-  double _calculateDistance(Position pos1, Position pos2) {
-    return Geolocator.distanceBetween(
-      pos1.latitude,
-      pos1.longitude,
-      pos2.latitude,
-      pos2.longitude,
-    );
   }
 
   void _addMarkersFromFirestore() {
@@ -187,6 +156,7 @@ class _PembeliState extends State<Pembeli> {
                               Text(
                                 'Chapter 1',
                                 style: TextStyle(
+                                  // fontFamily: "Poppins",
                                   fontSize: 10,
                                 ),
                               ),
@@ -197,12 +167,14 @@ class _PembeliState extends State<Pembeli> {
                                 fullName,
                                 style: TextStyle(
                                   fontWeight: FontWeight.w700,
+                                  // fontFamily: "Poppins",
                                   fontSize: 14,
                                 ),
                               ),
                               Text(
                                 '10 Materi Pembelajaran',
                                 style: TextStyle(
+                                  // fontFamily: "Poppins",
                                   fontSize: 11,
                                 ),
                               ),
@@ -210,24 +182,20 @@ class _PembeliState extends State<Pembeli> {
                                 padding: const EdgeInsets.all(8.0),
                                 child: Row(
                                   children: [
-                                    ElevatedButton(
-                                      onPressed: () {
-                                        Navigator.pushReplacement(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) =>
-                                                RutePedagang(),
-                                          ),
-                                        );
-                                      },
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.blue,
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(8.0),
-                                        ),
+                                    SizedBox(
+                                      width:
+                                          (MediaQuery.of(context).size.width -
+                                                  100) /
+                                              3,
+                                    ),
+                                    const Text(
+                                      'Pelajari',
+                                      style: TextStyle(
+                                        // fontFamily: "Poppins",
+                                        fontSize: 10,
+                                        color: Color.fromARGB(255, 28, 140, 36),
+                                        fontWeight: FontWeight.bold,
                                       ),
-                                      child: Text('Track'),
                                     ),
                                   ],
                                 ),

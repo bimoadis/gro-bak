@@ -1,47 +1,39 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class GetLongLat {
-  // Stream untuk mendapatkan data dari koleksi 'users' di Firestore
-  final Stream<QuerySnapshot> _usersStream =
-      FirebaseFirestore.instance.collection('users').snapshots();
+Future<List<Map<String, dynamic>>> readMerchantData() async {
+  List<Map<String, dynamic>> combinedData = [];
 
-  // Metode untuk mendapatkan stream pengguna yang memiliki 'role = Pedagang'
-  Stream<List<Map<String, dynamic>>> getUsersStream() {
-    // Map untuk mengubah stream QuerySnapshot menjadi stream List<Map<String, dynamic>>
-    return _usersStream.map((snapshot) {
-      // Memfilter dokumen-dokumen yang memiliki 'role' = 'Pedagang'
-      return snapshot.docs
-          .where((doc) {
-            final userData = doc.data() as Map<String, dynamic>;
-            return userData['role'] == 'Pedagang';
-          })
-          .map((doc) {
-            final userData = doc.data() as Map<String, dynamic>;
-            final fullName = userData['email'] ?? 'Unknown';
-            final company = userData['role'] ?? 'Unknown';
+  try {
+    // Membaca data dari tabel 'users'
+    QuerySnapshot usersQuery =
+        await FirebaseFirestore.instance.collection('users').get();
+    List<DocumentSnapshot> usersDocs = usersQuery.docs;
 
-            // Mendapatkan latitude dan longitude dalam bentuk double
-            final latitude = userData['latitude'] is double
-                ? userData['latitude']
-                : userData['latitude'] != null
-                    ? double.tryParse(userData['latitude'].toString())
-                    : null;
-            final longitude = userData['longitude'] is double
-                ? userData['longitude']
-                : userData['longitude'] != null
-                    ? double.tryParse(userData['longitude'].toString())
-                    : null;
+    // Mengambil data dari setiap dokumen pada tabel 'users'
+    for (var userDoc in usersDocs) {
+      Map<String, dynamic> userData = userDoc.data() as Map<String, dynamic>;
+      String uid = userDoc.id;
+      String role = userData['role'];
 
-            // Mengembalikan data pengguna dalam bentuk Map
-            return {
-              'fullName': fullName,
-              'company': company,
-              'latitude': latitude,
-              'longitude': longitude,
-            };
-          })
-          .where((data) => data != null)
-          .toList();
-    });
+      // Jika peran pengguna adalah "Pedagang", baca data pedagang dari tabel 'merchant'
+      if (role == 'Pedagang') {
+        DocumentSnapshot merchantDoc = await FirebaseFirestore.instance
+            .collection('merchant')
+            .doc(uid)
+            .get();
+        if (merchantDoc.exists) {
+          Map<String, dynamic> merchantData =
+              merchantDoc.data() as Map<String, dynamic>;
+          // Menggabungkan data pedagang dengan data pengguna
+          userData.addAll(merchantData);
+          // Menambahkan data pengguna (dan jika ada, data pedagang) ke dalam daftar gabungan
+          combinedData.add(userData);
+        }
+      }
+    }
+  } catch (e) {
+    print('Error reading data: $e');
   }
+
+  return combinedData;
 }
