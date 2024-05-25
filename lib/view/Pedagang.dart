@@ -43,7 +43,28 @@ class _PedagangState extends State<Pedagang> {
           )
         ],
       ),
-      body: Center(),
+      body: Center(
+          child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+        Text(
+          "Selamat Datang di Gro-bak",
+          style: TextStyle(
+            fontSize: 30,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        SizedBox(
+          height: 20,
+        ),
+        Text(
+          "Silahkan pilih menu yang ingin anda lakukan",
+          style: TextStyle(
+            fontSize: 20,
+          ),
+        ),
+        SizedBox(
+          height: 20,
+        ),
+      ])),
     );
   }
 
@@ -81,7 +102,7 @@ class _PedagangState extends State<Pedagang> {
   void initState() {
     super.initState();
     _gps.startPositionStream(_handlePositionStream);
-    startTimer(); // Memanggil fungsi startTimer saat initState dipanggil
+    // startTimer(); // Memanggil fungsi startTimer saat initState dipanggil
   }
 
   void startTimer() {

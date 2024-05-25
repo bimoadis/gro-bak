@@ -37,6 +37,14 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    final userMap = userData?.data() as Map<String, dynamic>? ?? {};
+    final merchantMap = merchantData?.data() as Map<String, dynamic>? ?? {};
+
+    final email = userMap['email'] ?? 'Unknown';
+    final role = userMap['role'] ?? 'Unknown';
+    final namaUsaha = merchantMap['nama_usaha'] ?? 'Unknown';
+    final nomorTelepon = merchantMap['nomor_telepon'] ?? 'Unknown';
+
     return Scaffold(
       appBar: AppBar(
         title: Text("Gro-bak"),
@@ -45,62 +53,56 @@ class _ProfilePageState extends State<ProfilePage> {
             onPressed: () {
               // Tambahkan logika logout di sini
             },
-            icon: Icon(
-              Icons.logout,
-            ),
+            icon: Icon(Icons.logout),
           )
         ],
       ),
       body: userData == null || merchantData == null
           ? Center(child: CircularProgressIndicator())
-          : _buildProfileContent(),
+          : Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  SizedBox(height: 100),
+                  CircleAvatar(
+                    radius: 50,
+                    // You can use a network image or an asset image
+                    backgroundImage:
+                        AssetImage('assets/images/profile-none.jpg'),
+                    child: Icon(Icons.person, size: 50),
+                  ),
+                  SizedBox(height: 20),
+                  Text(
+                    email,
+                    style: TextStyle(
+                      fontSize: 18,
+                    ),
+                  ),
+                  SizedBox(height: 40),
+                  buildProfileRow(Icons.work, role),
+                  SizedBox(height: 30),
+                  buildProfileRow(Icons.business, namaUsaha),
+                  SizedBox(height: 30),
+                  buildProfileRow(Icons.phone, nomorTelepon),
+                  SizedBox(height: 30),
+                  buildProfileRow(
+                      Icons.add_location_alt_outlined, 'Rute Dagang'),
+                ],
+              ),
+            ),
     );
   }
 
-  Widget _buildProfileContent() {
-    final userMap = userData!.data() as Map<String, dynamic>;
-    final merchantMap = merchantData!.data() as Map<String, dynamic>;
-
-    final email = userMap['email'] ?? 'Unknown';
-    final role = userMap['role'] ?? 'Unknown';
-    final namaUsaha = merchantMap['nama_usaha'] ?? 'Unknown';
-    final nomorTelepon = merchantMap['nomor_telepon'] ?? 'Unknown';
-
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+  Widget buildProfileRow(IconData icon, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 40.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          CircleAvatar(
-            radius: 50,
-            // You can use a network image or an asset image
-            backgroundImage: AssetImage('assets/images/profile-none.jpg'),
-            child: Icon(Icons.person, size: 50),
-          ),
-          SizedBox(height: 20),
-          SizedBox(height: 10),
+          Icon(icon),
+          SizedBox(width: 20),
           Text(
-            email,
-            style: TextStyle(
-              fontSize: 18,
-            ),
-          ),
-          SizedBox(height: 20),
-          Text(
-            'Role: $role',
-            style: TextStyle(
-              fontSize: 16,
-            ),
-          ),
-          SizedBox(height: 10),
-          Text(
-            'namaUsaha: $namaUsaha',
-            style: TextStyle(
-              fontSize: 16,
-            ),
-          ),
-          SizedBox(height: 10),
-          Text(
-            'telepon: $nomorTelepon',
+            value,
             style: TextStyle(
               fontSize: 16,
             ),
