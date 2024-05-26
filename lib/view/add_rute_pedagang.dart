@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:gro_bak/helpers/adress.dart';
-import 'package:gro_bak/repository/getAddress.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:gro_bak/helpers/adress.dart';
+
+import 'package:gro_bak/repository/getAddress.dart';
 
 class AddRutePedagang extends StatefulWidget {
   @override
@@ -75,27 +77,47 @@ class _AddRutePedagangState extends State<AddRutePedagang> {
       return;
     }
 
-    try {
-      FirebaseFirestore firebaseFirestore = FirebaseFirestore.instance;
-      var user = _auth.currentUser;
-      if (user != null) {
-        CollectionReference ref =
-            FirebaseFirestore.instance.collection('merchant');
+    String fullAddress =
+        '${_addressController.text}, ${selectedDistrict!.name}, ${selectedRegency!.name}, ${selectedProvince!.name}';
+    print('Full address: $fullAddress');
 
-        List<Map<String, dynamic>> rute = [
-          {
-            "name": selectedProvince!.name,
-            "latitude": selectedRegency!.name,
-            "longitude": '${selectedRegency!.name}, ${selectedProvince!.name}',
-            "address":
-                '${_addressController.text},${selectedDistrict!.name},${selectedRegency!.name}, ${selectedProvince!.name} ',
-          },
-          // Tambahkan lebih banyak rute jika diperlukan
-        ];
-        ref.doc(user.uid).update({'rute': rute});
+    try {
+      List<Location> locations = await locationFromAddress(fullAddress);
+      print('Locations: $locations');
+
+      if (locations.isNotEmpty) {
+        double latitude = locations.first.latitude;
+        double longitude = locations.first.longitude;
+        print('Latitude: $latitude, Longitude: $longitude');
+
+        FirebaseFirestore firebaseFirestore = FirebaseFirestore.instance;
+        var user = _auth.currentUser;
+        if (user != null) {
+          CollectionReference ref =
+              FirebaseFirestore.instance.collection('merchant');
+          DocumentSnapshot docSnapshot = await ref.doc(user.uid).get();
+
+          List<dynamic> rute = docSnapshot['rute'] ?? [];
+          rute.add({
+            "name": fullAddress,
+            "latitude": latitude,
+            "longitude": longitude,
+            "address": fullAddress,
+          });
+
+          await ref.doc(user.uid).update({'rute': rute});
+          ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Address saved successfully')));
+        } else {
+          print('User is not logged in');
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text('User is not logged in')));
+        }
+      } else {
+        print('Failed to find location for the address');
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Failed to find location')));
       }
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Address saved successfully')));
     } catch (e) {
       print('Failed to save address: $e');
       ScaffoldMessenger.of(context)
