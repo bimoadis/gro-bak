@@ -26,7 +26,7 @@ class _PembeliState extends State<Pembeli> {
 
   Completer<GoogleMapController> _controller = Completer();
   Future<List<Map<String, dynamic>>>? _combinedDataFuture;
-  Set<Marker> _markers = Set<Marker>(); // Change to List<Marker>
+  Set<Marker> _markers = Set<Marker>();
 
   @override
   Widget build(BuildContext context) {
@@ -49,17 +49,15 @@ class _PembeliState extends State<Pembeli> {
           target: LatLng(-7.27562362979344, 112.79377717822462),
           zoom: 15,
         ),
-        markers:
-            Set<Marker>.from(_markers), // Set the markers for the GoogleMap
+        markers: Set<Marker>.from(_markers),
         onMapCreated: (GoogleMapController controller) {
           _controller.complete(controller);
         },
         myLocationEnabled: true,
-        zoomControlsEnabled:
-            false, // Menonaktifkan kontrol zoom in dan zoom out
-        compassEnabled: false, // Menonaktifkan kompas
+        zoomControlsEnabled: false,
+        compassEnabled: false,
         myLocationButtonEnabled: false,
-        mapToolbarEnabled: false, // Menonaktifkan tombol fokus lokasi pengguna
+        mapToolbarEnabled: false,
       ),
     );
   }
@@ -79,7 +77,7 @@ class _PembeliState extends State<Pembeli> {
   void initState() {
     super.initState();
     _gps.startPositionStream(_handlePositionStream);
-    _addMarkersFromFirestore(); // Call directly here
+    _addMarkersFromFirestore();
   }
 
   void _handlePositionStream(Position position) async {
@@ -122,6 +120,7 @@ class _PembeliState extends State<Pembeli> {
       Set<Marker> markers = Set<Marker>();
       for (var data in combinedData) {
         if (data['latitude'] != '' && data['longitude'] != '') {
+          print(combinedData);
           try {
             LatLng position = LatLng(data['latitude'], data['longitude']);
             markers.add(
@@ -129,7 +128,8 @@ class _PembeliState extends State<Pembeli> {
                 markerId: MarkerId(data['email']),
                 position: position,
                 onTap: () {
-                  _showBottomSheet(data['email']);
+                  _showBottomSheet(data['nama_usaha'], data['nama'],
+                      data['rute'], data['latitude'], data['longitude']);
                 },
               ),
             );
@@ -144,7 +144,8 @@ class _PembeliState extends State<Pembeli> {
     });
   }
 
-  void _showBottomSheet(String fullName) {
+  void _showBottomSheet(String nameMerchant, String name,
+      List<dynamic> seluruhRute, double latitude, double longitude) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -160,6 +161,16 @@ class _PembeliState extends State<Pembeli> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Text(
+                      'Detail Pedagang',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
                   Row(
                     children: [
                       Card(
@@ -182,26 +193,20 @@ class _PembeliState extends State<Pembeli> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               SizedBox(
-                                height: 30,
-                              ),
-                              Text(
-                                'Chapter 1',
-                                style: TextStyle(
-                                  fontSize: 10,
-                                ),
+                                height: 40,
                               ),
                               SizedBox(
                                 height: 8,
                               ),
                               Text(
-                                fullName,
+                                nameMerchant,
                                 style: TextStyle(
                                   fontWeight: FontWeight.w700,
                                   fontSize: 14,
                                 ),
                               ),
                               Text(
-                                '10 Materi Pembelajaran',
+                                name,
                                 style: TextStyle(
                                   fontSize: 11,
                                 ),
@@ -215,8 +220,13 @@ class _PembeliState extends State<Pembeli> {
                                         Navigator.pushReplacement(
                                           context,
                                           MaterialPageRoute(
-                                            builder: (context) =>
-                                                RutePedagang(),
+                                            builder: (context) => RutePedagang(
+                                              seluruhRute: seluruhRute,
+                                              latitude: latitude,
+                                              longitude: longitude,
+                                              namaPemilik: name,
+                                              namaUsaha: nameMerchant,
+                                            ),
                                           ),
                                         );
                                       },
@@ -224,7 +234,7 @@ class _PembeliState extends State<Pembeli> {
                                         backgroundColor: Colors.blue,
                                         shape: RoundedRectangleBorder(
                                           borderRadius:
-                                              BorderRadius.circular(8.0),
+                                              BorderRadius.circular(16.0),
                                         ),
                                       ),
                                       child: Text('Track'),
