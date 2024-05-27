@@ -227,6 +227,8 @@ class _RegisterState extends State<Register> {
     await merchantDocRef.set({
       'nama_usaha': namaUsaha,
       'nomor_telepon': nomorTelepon,
+      'rute': [],
+      'status': 'tutup',
     });
   }
 
