@@ -1,23 +1,21 @@
 import 'dart:async';
-
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 
 class RutePedagang extends StatefulWidget {
   final List<dynamic> seluruhRute;
-  final double longitude;
-  final double latitude;
   final String namaUsaha;
   final String namaPemilik;
+  final String uid;
 
   const RutePedagang(
       {Key? key,
       required this.seluruhRute,
-      required this.longitude,
-      required this.latitude,
       required this.namaUsaha,
-      required this.namaPemilik})
+      required this.namaPemilik,
+      required this.uid})
       : super(key: key);
 
   @override
@@ -28,9 +26,53 @@ class _RutePedagangState extends State<RutePedagang> {
   Completer<GoogleMapController> _controller = Completer();
   Set<Marker> _markers = Set<Marker>();
   List<Polyline> _polylines = [];
+  Map<String, dynamic>? _merchantData;
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadMerchantData();
+    _addMarkers(widget.seluruhRute);
+    _startPeriodicDataLoad();
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  void _startPeriodicDataLoad() {
+    _timer = Timer.periodic(Duration(seconds: 10), (timer) {
+      _loadMerchantData();
+    });
+  }
+
+  Future<void> _loadMerchantData() async {
+    try {
+      DocumentSnapshot merchantDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(widget.uid)
+          .get();
+
+      if (merchantDoc.exists) {
+        setState(() {
+          _merchantData = merchantDoc.data() as Map<String, dynamic>;
+        });
+        print(
+            'User latitude and longitude jabdiahdibin: ${_merchantData?['latitude']}, ${_merchantData?['longitude']}');
+      }
+    } catch (e) {
+      print('Error fetching merchant data: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    double? latitude = _merchantData?['latitude'];
+    double? longitude = _merchantData?['longitude'];
+
     return Scaffold(
       appBar: AppBar(
         title: Text("Rute Pedagang"),
@@ -40,24 +82,26 @@ class _RutePedagangState extends State<RutePedagang> {
         children: [
           Expanded(
             flex: 2,
-            child: GoogleMap(
-              initialCameraPosition: CameraPosition(
-                target: LatLng(widget.latitude, widget.longitude),
-                zoom: 15,
-              ),
-              markers: Set<Marker>.from(_markers),
-              polylines: Set<Polyline>.of(_polylines),
-              onMapCreated: (GoogleMapController controller) {
-                _controller.complete(controller);
-                _addInitialMarker();
-                _fetchAndAddPolylines();
-              },
-              myLocationEnabled: true,
-              zoomControlsEnabled: false,
-              compassEnabled: false,
-              myLocationButtonEnabled: false,
-              mapToolbarEnabled: false,
-            ),
+            child: latitude != null && longitude != null
+                ? GoogleMap(
+                    initialCameraPosition: CameraPosition(
+                      target: LatLng(latitude, longitude),
+                      zoom: 15,
+                    ),
+                    markers: Set<Marker>.from(_markers),
+                    polylines: Set<Polyline>.of(_polylines),
+                    onMapCreated: (GoogleMapController controller) {
+                      _controller.complete(controller);
+                      _addInitialMarker(latitude, longitude);
+                      _fetchAndAddPolylines(latitude, longitude);
+                    },
+                    myLocationEnabled: true,
+                    zoomControlsEnabled: false,
+                    compassEnabled: false,
+                    myLocationButtonEnabled: false,
+                    mapToolbarEnabled: false,
+                  )
+                : Center(child: CircularProgressIndicator()),
           ),
           _buildDetailsContainer()
         ],
@@ -65,14 +109,8 @@ class _RutePedagangState extends State<RutePedagang> {
     );
   }
 
-  @override
-  void initState() {
-    super.initState();
-    _addMarkers(widget.seluruhRute);
-  }
-
-  void _addInitialMarker() {
-    LatLng initialPosition = LatLng(widget.latitude, widget.longitude);
+  void _addInitialMarker(double latitude, double longitude) {
+    LatLng initialPosition = LatLng(latitude, longitude);
     Marker marker = Marker(
       markerId: MarkerId('initial_position'),
       position: initialPosition,
@@ -120,15 +158,15 @@ class _RutePedagangState extends State<RutePedagang> {
     });
   }
 
-  Future<List<LatLng>> _fetchPolylinePoints(
-      double latitude, double longitude) async {
+  Future<List<LatLng>> _fetchPolylinePoints(double startLatitude,
+      double startLongitude, double endLatitude, double endLongitude) async {
     List<LatLng> polylineCoordinates = [];
     PolylinePoints polylinePoints = PolylinePoints();
 
     PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
       'AIzaSyAtpOTREuiLvV0d1i627qgDPyvElEdogLs', // Replace with your Google Maps API Key
-      PointLatLng(widget.latitude, widget.longitude),
-      PointLatLng(latitude, longitude),
+      PointLatLng(startLatitude, startLongitude),
+      PointLatLng(endLatitude, endLongitude),
     );
 
     if (result.points.isNotEmpty) {
@@ -140,11 +178,11 @@ class _RutePedagangState extends State<RutePedagang> {
     return polylineCoordinates;
   }
 
-  Future<void> _fetchAndAddPolylines() async {
+  Future<void> _fetchAndAddPolylines(double latitude, double longitude) async {
     for (var route in widget.seluruhRute) {
       if (route['latitude'] != null && route['longitude'] != null) {
-        List<LatLng> polylineCoordinates =
-            await _fetchPolylinePoints(route['latitude'], route['longitude']);
+        List<LatLng> polylineCoordinates = await _fetchPolylinePoints(
+            latitude, longitude, route['latitude'], route['longitude']);
         _addPolyline(polylineCoordinates);
       }
     }

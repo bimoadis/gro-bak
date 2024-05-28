@@ -102,11 +102,11 @@ class _PedagangState extends State<Pedagang> {
   void initState() {
     super.initState();
     _gps.startPositionStream(_handlePositionStream);
-    // startTimer(); // Memanggil fungsi startTimer saat initState dipanggil
+    startTimer(); // Memanggil fungsi startTimer saat initState dipanggil
   }
 
   void startTimer() {
-    Timer.periodic(Duration(seconds: 30), (timer) {
+    Timer.periodic(Duration(seconds: 10), (timer) {
       postDetailsToFirestore(
           _userPosition?.latitude ?? 0.0, _userPosition?.longitude ?? 0.0);
     });

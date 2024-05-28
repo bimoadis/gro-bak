@@ -23,6 +23,7 @@ class _PembeliState extends State<Pembeli> {
   final GPS _gps = GPS();
   Position? _userPosition;
   Exception? _exception;
+  Timer? _timer;
 
   Completer<GoogleMapController> _controller = Completer();
   Future<List<Map<String, dynamic>>>? _combinedDataFuture;
@@ -78,6 +79,7 @@ class _PembeliState extends State<Pembeli> {
     super.initState();
     _gps.startPositionStream(_handlePositionStream);
     _addMarkersFromFirestore();
+    _startPeriodicDataLoad();
   }
 
   void _handlePositionStream(Position position) async {
@@ -111,6 +113,18 @@ class _PembeliState extends State<Pembeli> {
     );
   }
 
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  void _startPeriodicDataLoad() {
+    _timer = Timer.periodic(Duration(seconds: 10), (timer) {
+      _addMarkersFromFirestore();
+    });
+  }
+
   void _addMarkersFromFirestore() {
     setState(() {
       _combinedDataFuture = readMerchantData();
@@ -128,8 +142,13 @@ class _PembeliState extends State<Pembeli> {
                 markerId: MarkerId(data['email']),
                 position: position,
                 onTap: () {
-                  _showBottomSheet(data['nama_usaha'], data['nama'],
-                      data['rute'], data['latitude'], data['longitude']);
+                  _showBottomSheet(
+                      data['nama_usaha'],
+                      data['nama'],
+                      data['rute'],
+                      data['latitude'],
+                      data['longitude'],
+                      data['uid']);
                 },
               ),
             );
@@ -144,8 +163,13 @@ class _PembeliState extends State<Pembeli> {
     });
   }
 
-  void _showBottomSheet(String nameMerchant, String name,
-      List<dynamic> seluruhRute, double latitude, double longitude) {
+  void _showBottomSheet(
+      String nameMerchant,
+      String name,
+      List<dynamic> seluruhRute,
+      double latitude,
+      double longitude,
+      String uid) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -221,12 +245,10 @@ class _PembeliState extends State<Pembeli> {
                                           context,
                                           MaterialPageRoute(
                                             builder: (context) => RutePedagang(
-                                              seluruhRute: seluruhRute,
-                                              latitude: latitude,
-                                              longitude: longitude,
-                                              namaPemilik: name,
-                                              namaUsaha: nameMerchant,
-                                            ),
+                                                seluruhRute: seluruhRute,
+                                                namaPemilik: name,
+                                                namaUsaha: nameMerchant,
+                                                uid: uid),
                                           ),
                                         );
                                       },

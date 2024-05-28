@@ -24,6 +24,8 @@ Future<List<Map<String, dynamic>>> readMerchantData() async {
         if (merchantDoc.exists) {
           Map<String, dynamic> merchantData =
               merchantDoc.data() as Map<String, dynamic>;
+          // Menambahkan uid ke dalam data pedagang
+          merchantData['uid'] = uid;
           // Menggabungkan data pedagang dengan data pengguna
           userData.addAll(merchantData);
           // Menambahkan data pengguna (dan jika ada, data pedagang) ke dalam daftar gabungan
