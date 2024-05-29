@@ -1,8 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:gro_bak/view/widget/bottom_bar.dart';
+import 'package:gro_bak/view/widget/form_widget.dart';
 import 'Pembeli.dart';
 import 'register.dart';
 
@@ -18,11 +18,34 @@ class _LoginPageState extends State<LoginPage> {
   TextEditingController _emailController = TextEditingController();
   TextEditingController _passwordController = TextEditingController();
 
+  String? _emailError;
+  String? _passwordError;
+
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
+  }
+
+  void validateInputs() {
+    setState(() {
+      if (_emailController.text.isEmpty) {
+        _emailError = "Please enter your email";
+      } else if (!_emailController.text.contains('@')) {
+        _emailError = "Please enter a valid email";
+      } else {
+        _emailError = null;
+      }
+
+      if (_passwordController.text.isEmpty) {
+        _passwordError = "Please enter your password";
+      } else if (_passwordController.text.length < 6) {
+        _passwordError = "Password must be at least 6 characters";
+      } else {
+        _passwordError = null;
+      }
+    });
   }
 
   @override
@@ -41,39 +64,53 @@ class _LoginPageState extends State<LoginPage> {
                   style: TextStyle(fontSize: 27, fontWeight: FontWeight.bold),
                 ),
                 SizedBox(height: 30),
-                TextFormField(
-                  controller: _emailController,
-                  decoration: InputDecoration(
-                    hintText: "Email",
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your email';
-                    }
-                    return null;
-                  },
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    FormContainerWidget(
+                      controller: _emailController,
+                      hintText: "Email",
+                      isPasswordField: false,
+                    ),
+                    if (_emailError != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 5.0),
+                        child: Text(
+                          _emailError!,
+                          style: TextStyle(color: Colors.red, fontSize: 12),
+                        ),
+                      ),
+                  ],
                 ),
                 SizedBox(height: 10),
-                TextFormField(
-                  controller: _passwordController,
-                  obscureText: true,
-                  decoration: InputDecoration(
-                    hintText: "Password",
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your password';
-                    }
-                    return null;
-                  },
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    FormContainerWidget(
+                      controller: _passwordController,
+                      hintText: "Password",
+                      isPasswordField: true,
+                    ),
+                    if (_passwordError != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 5.0),
+                        child: Text(
+                          _passwordError!,
+                          style: TextStyle(color: Colors.red, fontSize: 12),
+                        ),
+                      ),
+                  ],
                 ),
                 SizedBox(height: 30),
                 GestureDetector(
                   onTap: () {
-                    setState(() {
-                      _isSigning = true;
-                    });
-                    signIn(_emailController.text, _passwordController.text);
+                    validateInputs();
+                    if (_emailError == null && _passwordError == null) {
+                      setState(() {
+                        _isSigning = true;
+                      });
+                      signIn(_emailController.text, _passwordController.text);
+                    }
                   },
                   child: Container(
                     width: double.infinity,
@@ -159,21 +196,39 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void signIn(String email, String password) async {
-    if (_formKey.currentState!.validate()) {
-      try {
-        UserCredential userCredential =
-            await FirebaseAuth.instance.signInWithEmailAndPassword(
-          email: email,
-          password: password,
-        );
-        route();
-      } on FirebaseAuthException catch (e) {
-        if (e.code == 'user-not-found') {
-          print('No user found for that email.');
-        } else if (e.code == 'wrong-password') {
-          print('Wrong password provided for that user.');
+    setState(() {
+      _isSigning = true;
+      _emailError = null;
+      _passwordError = null;
+    });
+
+    try {
+      UserCredential userCredential =
+          await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      route();
+    } on FirebaseAuthException catch (e) {
+      setState(() {
+        _isSigning = false;
+        if (e.code == 'invalid-credential') {
+          _emailError = 'Please check your email.';
+          _passwordError = 'Please check your password.';
+        } else {
+          _emailError = 'An error occurred. Please try again.';
+          _passwordError = 'An error occurred. Please try again.';
         }
-      }
+      });
+      print('FirebaseAuthException code: ${e.code}');
+      print('FirebaseAuthException message: ${e.message}');
+    } catch (e) {
+      setState(() {
+        _isSigning = false;
+        _emailError = 'An unknown error occurred. Please try again.';
+        _passwordError = 'An unknown error occurred. Please try again.';
+      });
+      print('Exception: $e');
     }
   }
 }

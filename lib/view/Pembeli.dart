@@ -79,7 +79,7 @@ class _PembeliState extends State<Pembeli> {
     super.initState();
     _gps.startPositionStream(_handlePositionStream);
     _addMarkersFromFirestore();
-    _startPeriodicDataLoad();
+    // _startPeriodicDataLoad();
   }
 
   void _handlePositionStream(Position position) async {
@@ -120,7 +120,7 @@ class _PembeliState extends State<Pembeli> {
   }
 
   void _startPeriodicDataLoad() {
-    _timer = Timer.periodic(Duration(seconds: 10), (timer) {
+    _timer = Timer.periodic(Duration(seconds: 30), (timer) {
       _addMarkersFromFirestore();
     });
   }

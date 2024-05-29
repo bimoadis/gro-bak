@@ -70,9 +70,16 @@ class _RegisterState extends State<Register> {
                           backgroundColor:
                               _role == "Pembeli" ? Colors.blue : null,
                         ),
-                        child: Text("Pembeli"),
+                        child: Text(
+                          "Pembeli",
+                          style: TextStyle(
+                            color: _role == "Pembeli"
+                                ? Colors.white
+                                : Colors.black,
+                          ),
+                        ),
                       ),
-                      SizedBox(width: 10),
+                      SizedBox(width: 20),
                       ElevatedButton(
                         onPressed: () {
                           setState(() {
@@ -83,7 +90,14 @@ class _RegisterState extends State<Register> {
                           backgroundColor:
                               _role == "Pedagang" ? Colors.blue : null,
                         ),
-                        child: Text("Pedagang"),
+                        child: Text(
+                          "Pedagang",
+                          style: TextStyle(
+                            color: _role == "Pedagang"
+                                ? Colors.white
+                                : Colors.black,
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -124,12 +138,22 @@ class _RegisterState extends State<Register> {
                   GestureDetector(
                     onTap: () {
                       _signUp(
-                        email: _emailController.text,
+                        email: _emailController.text.isNotEmpty
+                            ? _emailController.text
+                            : null,
                         role: _role,
-                        password: _passwordController.text,
-                        namaUsaha: _namaUsahaController.text,
-                        username: _usernameController.text,
-                        nomorTelepon: _nomorTeleponController.text,
+                        password: _passwordController.text.isNotEmpty
+                            ? _passwordController.text
+                            : null,
+                        namaUsaha: _namaUsahaController.text.isNotEmpty
+                            ? _namaUsahaController.text
+                            : null,
+                        username: _usernameController.text.isNotEmpty
+                            ? _usernameController.text
+                            : null,
+                        nomorTelepon: _nomorTeleponController.text.isNotEmpty
+                            ? _nomorTeleponController.text
+                            : null,
                       );
                     },
                     child: Container(
@@ -186,18 +210,22 @@ class _RegisterState extends State<Register> {
     );
   }
 
-  void _signUp(
-      {required String email,
-      required String password,
-      required String role,
-      required String namaUsaha,
-      required String username,
-      required String nomorTelepon}) async {
+  void _signUp({
+    required String? email,
+    required String? password,
+    required String role,
+    required String? namaUsaha,
+    required String? username,
+    required String? nomorTelepon,
+  }) async {
     if (_formKey.currentState!.validate()) {
       setState(() {
         isSigningUp = true;
       });
       try {
+        if (email == null || password == null || username == null) {
+          throw Exception("Required fields are missing");
+        }
         await _firebaseAuth.createUserWithEmailAndPassword(
           email: email,
           password: password,
@@ -221,12 +249,12 @@ class _RegisterState extends State<Register> {
   }
 
   Future<void> createMerchant(
-      String uid, String namaUsaha, String nomorTelepon) async {
+      String uid, String? namaUsaha, String? nomorTelepon) async {
     DocumentReference merchantDocRef =
         FirebaseFirestore.instance.collection('merchant').doc(uid);
     await merchantDocRef.set({
-      'nama_usaha': namaUsaha,
-      'nomor_telepon': nomorTelepon,
+      'nama_usaha': namaUsaha ?? '',
+      'nomor_telepon': nomorTelepon ?? '',
       'rute': [],
       'status': 'tutup',
     });
