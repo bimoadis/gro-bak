@@ -51,19 +51,82 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
+      body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 15),
+          padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Form(
             key: _formKey,
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                Text(
-                  "Login",
-                  style: TextStyle(fontSize: 27, fontWeight: FontWeight.bold),
+                SizedBox(height: MediaQuery.of(context).size.height * 0.22),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Text(
+                      //   'Hallo,',
+                      //   style: TextStyle(
+                      //     fontSize:
+                      //         42, // Equivalent to text-4xl in Tailwind CSS
+                      //     fontWeight: FontWeight.bold,
+                      //     color: Color(0xFF060100),
+                      //   ),
+                      // ),
+                      SizedBox(
+                        height: 8,
+                      ), // Adding some space between the Text widgets
+                      RichText(
+                        text: TextSpan(
+                          children: [
+                            TextSpan(
+                              text: 'Selamat datang di ',
+                              style: TextStyle(
+                                fontSize:
+                                    42, // Equivalent to text-3xl in Tailwind CSS
+                                fontWeight: FontWeight.bold,
+                                color: Color(
+                                    0xFF060100), // Default color for the rest of the text
+                              ),
+                            ),
+                            TextSpan(
+                              text: 'Gro-bak!',
+                              style: TextStyle(
+                                fontSize:
+                                    42, // Equivalent to text-3xl in Tailwind CSS
+                                fontWeight: FontWeight.bold,
+                                color: Color(
+                                    0xFFFEC901), // Yellow color for "Gro-bak!"
+                                shadows: [
+                                  Shadow(
+                                    offset: Offset(
+                                        1.0, 1.0), // position of the shadow
+                                    blurRadius: 1.5, // blur effect
+                                    color: const Color.fromARGB(128, 0, 0,
+                                        0), // semi-transparent black color
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(
+                          height: MediaQuery.of(context).size.height *
+                              0.02), // Adding some space before the paragraph
+                      Text(
+                        'Silahkan masukkan email dan password akun anda',
+                        style: TextStyle(
+                          color: Colors
+                              .grey, // Equivalent to text-zinc-500 in Tailwind CSS
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                SizedBox(height: 30),
+                SizedBox(height: 20),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -116,7 +179,7 @@ class _LoginPageState extends State<LoginPage> {
                     width: double.infinity,
                     height: 45,
                     decoration: BoxDecoration(
-                      color: Colors.blue,
+                      color: Color(0xFFFEC901),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Center(
@@ -125,7 +188,7 @@ class _LoginPageState extends State<LoginPage> {
                           : Text(
                               "Login",
                               style: TextStyle(
-                                color: Colors.white,
+                                color: Color(0xFF060100),
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -137,7 +200,10 @@ class _LoginPageState extends State<LoginPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text("Don't have an account?"),
+                    Text("Belum memiliki akun?",
+                        style: TextStyle(
+                          color: Color(0xFF060100),
+                        )),
                     SizedBox(width: 5),
                     GestureDetector(
                       onTap: () {
@@ -151,8 +217,17 @@ class _LoginPageState extends State<LoginPage> {
                       child: Text(
                         "Sign Up",
                         style: TextStyle(
-                          color: Colors.blue,
+                          color: Color(0xFFFEC901),
                           fontWeight: FontWeight.bold,
+                          shadows: [
+                            const Shadow(
+                              offset:
+                                  Offset(0.25, 0.25), // position of the shadow
+                              blurRadius: 0.25, // blur effect
+                              color: Color.fromARGB(
+                                  128, 0, 0, 0), // semi-transparent black color
+                            ),
+                          ],
                         ),
                       ),
                     ),

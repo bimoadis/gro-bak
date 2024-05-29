@@ -33,7 +33,21 @@ class _PembeliState extends State<Pembeli> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Gro-bak"),
+        title: Text(
+          "Gro-bak",
+          style: TextStyle(
+            fontSize: 32,
+            color: Color(0xFFFEC901),
+            fontWeight: FontWeight.bold,
+            shadows: [
+              const Shadow(
+                offset: Offset(1.0, 1.0), // position of the shadow
+                blurRadius: 1.0, // blur effect
+                color: Color(0xFF060100), // semi-transparent black color
+              ),
+            ],
+          ),
+        ),
         actions: [
           IconButton(
             onPressed: () {
@@ -41,6 +55,7 @@ class _PembeliState extends State<Pembeli> {
             },
             icon: Icon(
               Icons.logout,
+              color: Color(0xFF060100),
             ),
           )
         ],
@@ -180,7 +195,8 @@ class _PembeliState extends State<Pembeli> {
               bottom: MediaQuery.of(context).viewInsets.bottom,
             ),
             child: Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 mainAxisSize: MainAxisSize.min,
@@ -210,14 +226,14 @@ class _PembeliState extends State<Pembeli> {
                           ),
                         ),
                       ),
-                      Container(
+                      Expanded(
                         child: Padding(
                           padding: const EdgeInsets.only(left: 10),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               SizedBox(
-                                height: 40,
+                                height: 10,
                               ),
                               SizedBox(
                                 height: 8,
@@ -226,19 +242,20 @@ class _PembeliState extends State<Pembeli> {
                                 nameMerchant,
                                 style: TextStyle(
                                   fontWeight: FontWeight.w700,
-                                  fontSize: 14,
+                                  fontSize: 20,
                                 ),
                               ),
                               Text(
                                 name,
                                 style: TextStyle(
-                                  fontSize: 11,
+                                  fontSize: 14,
                                 ),
                               ),
                               Padding(
                                 padding: const EdgeInsets.all(8.0),
                                 child: Row(
                                   children: [
+                                    Spacer(), // Add Spacer here
                                     ElevatedButton(
                                       onPressed: () {
                                         Navigator.pushReplacement(
@@ -253,13 +270,21 @@ class _PembeliState extends State<Pembeli> {
                                         );
                                       },
                                       style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.blue,
+                                        backgroundColor: Color(0xFFFEC901),
                                         shape: RoundedRectangleBorder(
                                           borderRadius:
                                               BorderRadius.circular(16.0),
                                         ),
+                                        elevation: 0,
+                                        shadowColor: Colors.transparent,
                                       ),
-                                      child: Text('Track'),
+                                      child: Text(
+                                        'Track',
+                                        style: TextStyle(
+                                          color: Color(0xFF060100),
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
                                     ),
                                   ],
                                 ),
