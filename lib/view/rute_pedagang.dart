@@ -1,6 +1,9 @@
 import 'dart:async';
+import 'dart:typed_data';
+import 'dart:ui' as ui;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 
@@ -29,10 +32,16 @@ class _RutePedagangState extends State<RutePedagang> {
   Map<String, dynamic>? _merchantData;
   Timer? _timer;
 
+  // Ikon kustom
+  BitmapDescriptor? shoppingCartIcon;
+  BitmapDescriptor? martIcon;
+
   @override
   void initState() {
     super.initState();
+    _setCustomMarkerIcons();
     _loadMerchantData();
+
     _addMarkers(widget.seluruhRute);
     // _startPeriodicDataLoad();
   }
@@ -61,11 +70,57 @@ class _RutePedagangState extends State<RutePedagang> {
           _merchantData = merchantDoc.data() as Map<String, dynamic>;
         });
         print(
-            'User latitude and longitude jabdiahdibin: ${_merchantData?['latitude']}, ${_merchantData?['longitude']}');
+            'User latitude and longitude: ${_merchantData?['latitude']}, ${_merchantData?['longitude']}');
+        _updateInitialMarker(
+            _merchantData!['latitude'], _merchantData!['longitude']);
       }
     } catch (e) {
       print('Error fetching merchant data: $e');
     }
+  }
+
+  Future<void> _setCustomMarkerIcons() async {
+    shoppingCartIcon =
+        await _createCustomMarkerIcon('assets/images/shopping-cart.png');
+    martIcon = await _createCustomMarkerIcon('assets/images/mart.png');
+    setState(() {});
+  }
+
+  Future<BitmapDescriptor> _createCustomMarkerIcon(String assetPath) async {
+    final ByteData data = await rootBundle.load(assetPath);
+    final ui.Codec codec = await ui.instantiateImageCodec(
+      data.buffer.asUint8List(),
+      targetWidth: 100, // Ukuran ikon yang diinginkan
+      targetHeight: 100,
+    );
+    final ui.FrameInfo fi = await codec.getNextFrame();
+    final ByteData? resizedData =
+        await fi.image.toByteData(format: ui.ImageByteFormat.png);
+
+    if (resizedData != null) {
+      final Uint8List resizedBytes = resizedData.buffer.asUint8List();
+      return BitmapDescriptor.fromBytes(resizedBytes);
+    } else {
+      return BitmapDescriptor.defaultMarker;
+    }
+  }
+
+  void _updateInitialMarker(double latitude, double longitude) {
+    LatLng newPosition = LatLng(latitude, longitude);
+    Marker marker = Marker(
+      markerId: MarkerId('initial_position'),
+      position: newPosition,
+      icon: shoppingCartIcon ??
+          BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+    );
+
+    setState(() {
+      _markers
+          .removeWhere((marker) => marker.markerId.value == 'initial_position');
+      _markers.add(marker);
+    });
+
+    _moveCamera(newPosition);
   }
 
   @override
@@ -114,7 +169,8 @@ class _RutePedagangState extends State<RutePedagang> {
     Marker marker = Marker(
       markerId: MarkerId('initial_position'),
       position: initialPosition,
-      icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+      icon: shoppingCartIcon ??
+          BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
     );
 
     setState(() {
@@ -147,7 +203,9 @@ class _RutePedagangState extends State<RutePedagang> {
         Marker marker = Marker(
           markerId: MarkerId(coordinate.toString()),
           position: coordinate,
-          icon: BitmapDescriptor.defaultMarker,
+          icon: martIcon ??
+              BitmapDescriptor.defaultMarkerWithHue(
+                  BitmapDescriptor.hueBlue), // Gunakan ikon kustom
         );
         markers.add(marker);
       }

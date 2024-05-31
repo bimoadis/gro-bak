@@ -59,7 +59,7 @@ class _LoginPageState extends State<LoginPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                SizedBox(height: MediaQuery.of(context).size.height * 0.22),
+                SizedBox(height: MediaQuery.of(context).size.height * 0.21),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 2.0),
                   child: Column(
@@ -253,7 +253,7 @@ class _LoginPageState extends State<LoginPage> {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (context) => BottomNavBar(),
+              builder: (context) => BottomNavBar(selectedIndex: 0),
             ),
           );
         } else {

@@ -1,8 +1,11 @@
 import 'dart:async';
+import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:gro_bak/helpers/gps.dart';
@@ -24,6 +27,7 @@ class _PembeliState extends State<Pembeli> {
   Position? _userPosition;
   Exception? _exception;
   Timer? _timer;
+  BitmapDescriptor sourceIcon = BitmapDescriptor.defaultMarker;
 
   Completer<GoogleMapController> _controller = Completer();
   Future<List<Map<String, dynamic>>>? _combinedDataFuture;
@@ -93,8 +97,16 @@ class _PembeliState extends State<Pembeli> {
   void initState() {
     super.initState();
     _gps.startPositionStream(_handlePositionStream);
+    setCustomMarkerIcon();
     _addMarkersFromFirestore();
+
     // _startPeriodicDataLoad();
+  }
+
+  void _startPeriodicDataLoad() {
+    _timer = Timer.periodic(Duration(seconds: 10), (timer) {
+      _addMarkersFromFirestore();
+    });
   }
 
   void _handlePositionStream(Position position) async {
@@ -134,12 +146,6 @@ class _PembeliState extends State<Pembeli> {
     super.dispose();
   }
 
-  void _startPeriodicDataLoad() {
-    _timer = Timer.periodic(Duration(seconds: 30), (timer) {
-      _addMarkersFromFirestore();
-    });
-  }
-
   void _addMarkersFromFirestore() {
     setState(() {
       _combinedDataFuture = readMerchantData();
@@ -149,12 +155,12 @@ class _PembeliState extends State<Pembeli> {
       Set<Marker> markers = Set<Marker>();
       for (var data in combinedData) {
         if (data['latitude'] != '' && data['longitude'] != '') {
-          print(combinedData);
           try {
             LatLng position = LatLng(data['latitude'], data['longitude']);
             markers.add(
               Marker(
                 markerId: MarkerId(data['email']),
+                icon: sourceIcon, // Use the custom icon here
                 position: position,
                 onTap: () {
                   _showBottomSheet(
@@ -302,5 +308,25 @@ class _PembeliState extends State<Pembeli> {
         );
       },
     );
+  }
+
+  void setCustomMarkerIcon() async {
+    final ByteData data =
+        await rootBundle.load("assets/images/shopping-cart.png");
+    final ui.Codec codec = await ui.instantiateImageCodec(
+      data.buffer.asUint8List(),
+      targetWidth: 100, // Set a slightly larger width
+      targetHeight: 100, // Set a slightly larger height
+    );
+    final ui.FrameInfo fi = await codec.getNextFrame();
+
+    final ByteData? resizedData =
+        await fi.image.toByteData(format: ui.ImageByteFormat.png);
+    if (resizedData != null) {
+      final Uint8List resizedBytes = resizedData.buffer.asUint8List();
+      setState(() {
+        sourceIcon = BitmapDescriptor.fromBytes(resizedBytes);
+      });
+    }
   }
 }

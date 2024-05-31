@@ -106,7 +106,7 @@ class _PedagangState extends State<Pedagang> {
   }
 
   void startTimer() {
-    Timer.periodic(Duration(seconds: 30), (timer) {
+    Timer.periodic(Duration(seconds: 10), (timer) {
       postDetailsToFirestore(
           _userPosition?.latitude ?? 0.0, _userPosition?.longitude ?? 0.0);
     });

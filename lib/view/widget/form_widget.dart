@@ -65,7 +65,9 @@ class _FormContainerWidgetState extends State<FormContainerWidget> {
                     },
                     child: Icon(
                       _obscureText ? Icons.visibility_off : Icons.visibility,
-                      color: _obscureText == false ? Colors.blue : Colors.grey,
+                      color: _obscureText == false
+                          ? Color(0xFFFEC901)
+                          : Colors.grey,
                     ),
                   )
                 : null,

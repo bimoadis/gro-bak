@@ -7,13 +7,14 @@ import 'package:gro_bak/view/pesanan_pedagang.dart';
 import 'package:gro_bak/view/profil_pedagang.dart';
 
 class BottomNavBar extends StatefulWidget {
+  int selectedIndex;
+  BottomNavBar({Key? key, required this.selectedIndex}) : super(key: key);
+
   @override
   _BottomNavBarState createState() => _BottomNavBarState();
 }
 
 class _BottomNavBarState extends State<BottomNavBar> {
-  int _selectedIndex = 0;
-
   static List<Widget> _widgetOptions = <Widget>[
     Pedagang(),
     AddRutePedagang(),
@@ -21,46 +22,46 @@ class _BottomNavBarState extends State<BottomNavBar> {
     ProfilePage(),
   ];
 
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: IndexedStack(
-        index: _selectedIndex,
+        index: widget.selectedIndex,
         children: _widgetOptions,
       ),
       bottomNavigationBar: BottomNavigationBar(
         items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.shopping_cart,
-                color: _selectedIndex == 0 ? Colors.blue : Colors.grey),
+                color: widget.selectedIndex == 0 ? Colors.blue : Colors.grey),
             label: 'Pesanan',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.menu,
-                color: _selectedIndex == 1 ? Colors.blue : Colors.grey),
+                color: widget.selectedIndex == 1 ? Colors.blue : Colors.grey),
             label: 'Menu',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.history,
-                color: _selectedIndex == 2 ? Colors.blue : Colors.grey),
+                color: widget.selectedIndex == 2 ? Colors.blue : Colors.grey),
             label: 'Riwayat',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person,
-                color: _selectedIndex == 3 ? Colors.blue : Colors.grey),
+                color: widget.selectedIndex == 3 ? Colors.blue : Colors.grey),
             label: 'Profil',
           ),
         ],
-        currentIndex: _selectedIndex,
+        currentIndex: widget.selectedIndex,
         selectedItemColor: Colors.blue,
         onTap: _onItemTapped,
       ),
     );
+  }
+
+  void _onItemTapped(int index) {
+    setState(() {
+      widget.selectedIndex = index;
+    });
   }
 }
