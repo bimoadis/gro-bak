@@ -298,6 +298,7 @@ class _RegisterState extends State<Register> {
       'nama_usaha': namaUsaha ?? '',
       'nomor_telepon': nomorTelepon ?? '',
       'rute': [],
+      'menu': [],
       'status': 'tutup',
     });
   }

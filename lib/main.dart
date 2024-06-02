@@ -6,7 +6,6 @@ import 'package:gro_bak/view/widget/bottom_bar.dart';
 import 'firebase_options.dart';
 import 'view/login.dart';
 import 'view/Pedagang.dart';
-import 'package:flutter/material.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,9 +26,9 @@ class _MyAppState extends State<MyApp> {
       theme: ThemeData(
         primaryColor: Colors.blue[900],
       ),
-      // home: LoginPage(),
+      home: LoginPage(),
       // home: Pembeli(),
-      home: BottomNavBar(selectedIndex: 2),
+      // home: BottomNavBar(selectedIndex: 1),
     );
   }
 }

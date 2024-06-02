@@ -243,13 +243,15 @@ class _LoginPageState extends State<LoginPage> {
 
   void route() async {
     User? user = FirebaseAuth.instance.currentUser;
-    var kk = FirebaseFirestore.instance
-        .collection('users')
-        .doc(user!.uid)
-        .get()
-        .then((DocumentSnapshot documentSnapshot) {
+    if (user != null) {
+      var documentSnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+
       if (documentSnapshot.exists) {
-        if (documentSnapshot.get('role') == "Pedagang") {
+        var data = documentSnapshot.data() as Map<String, dynamic>;
+        if (data['role'] == "Pedagang") {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
@@ -267,7 +269,7 @@ class _LoginPageState extends State<LoginPage> {
       } else {
         print('Document does not exist on the database');
       }
-    });
+    }
   }
 
   void signIn(String email, String password) async {

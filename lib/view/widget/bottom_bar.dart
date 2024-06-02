@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:gro_bak/view/Pedagang.dart';
 import 'package:gro_bak/view/add_rute_pedagang.dart';
+import 'package:gro_bak/view/list_menu_pedagang.dart';
 import 'package:gro_bak/view/list_rute_pedagang.dart';
-import 'package:gro_bak/view/menu_pedagang.dart';
+import 'package:gro_bak/view/add_menu_pedagang.dart';
 import 'package:gro_bak/view/pesanan_pedagang.dart';
 import 'package:gro_bak/view/profil_pedagang.dart';
 
@@ -17,7 +18,7 @@ class BottomNavBar extends StatefulWidget {
 class _BottomNavBarState extends State<BottomNavBar> {
   static List<Widget> _widgetOptions = <Widget>[
     Pedagang(),
-    AddRutePedagang(),
+    ListMenuPage(),
     ListRutePage(),
     ProfilePage(),
   ];

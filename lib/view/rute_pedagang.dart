@@ -66,13 +66,15 @@ class _RutePedagangState extends State<RutePedagang> {
           .get();
 
       if (merchantDoc.exists) {
-        setState(() {
-          _merchantData = merchantDoc.data() as Map<String, dynamic>;
-        });
-        print(
-            'User latitude and longitude: ${_merchantData?['latitude']}, ${_merchantData?['longitude']}');
-        _updateInitialMarker(
-            _merchantData!['latitude'], _merchantData!['longitude']);
+        if (mounted) {
+          setState(() {
+            _merchantData = merchantDoc.data() as Map<String, dynamic>;
+          });
+          print(
+              'User latitude and longitude: ${_merchantData?['latitude']}, ${_merchantData?['longitude']}');
+          _updateInitialMarker(
+              _merchantData!['latitude'], _merchantData!['longitude']);
+        }
       }
     } catch (e) {
       print('Error fetching merchant data: $e');
@@ -83,7 +85,9 @@ class _RutePedagangState extends State<RutePedagang> {
     shoppingCartIcon =
         await _createCustomMarkerIcon('assets/images/shopping-cart.png');
     martIcon = await _createCustomMarkerIcon('assets/images/mart.png');
-    setState(() {});
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   Future<BitmapDescriptor> _createCustomMarkerIcon(String assetPath) async {
@@ -114,13 +118,15 @@ class _RutePedagangState extends State<RutePedagang> {
           BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
     );
 
-    setState(() {
-      _markers
-          .removeWhere((marker) => marker.markerId.value == 'initial_position');
-      _markers.add(marker);
-    });
+    if (mounted) {
+      setState(() {
+        _markers.removeWhere(
+            (marker) => marker.markerId.value == 'initial_position');
+        _markers.add(marker);
+      });
 
-    _moveCamera(newPosition);
+      _moveCamera(newPosition);
+    }
   }
 
   @override
@@ -173,9 +179,11 @@ class _RutePedagangState extends State<RutePedagang> {
           BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
     );
 
-    setState(() {
-      _markers.add(marker);
-    });
+    if (mounted) {
+      setState(() {
+        _markers.add(marker);
+      });
+    }
 
     _moveCamera(initialPosition);
   }
@@ -211,9 +219,11 @@ class _RutePedagangState extends State<RutePedagang> {
       }
     }
 
-    setState(() {
-      _markers.addAll(markers);
-    });
+    if (mounted) {
+      setState(() {
+        _markers.addAll(markers);
+      });
+    }
   }
 
   Future<List<LatLng>> _fetchPolylinePoints(double startLatitude,
@@ -254,9 +264,11 @@ class _RutePedagangState extends State<RutePedagang> {
       width: 5,
     );
 
-    setState(() {
-      _polylines.add(polyline);
-    });
+    if (mounted) {
+      setState(() {
+        _polylines.add(polyline);
+      });
+    }
   }
 
   Widget _buildDetailsContainer() {

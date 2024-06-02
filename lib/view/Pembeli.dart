@@ -10,6 +10,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:gro_bak/helpers/gps.dart';
 import 'package:gro_bak/repository/getLongLat.dart';
+import 'package:gro_bak/view/list_menu_pembeli.dart';
 import 'package:gro_bak/view/rute_pedagang.dart';
 
 import 'login.dart';
@@ -167,6 +168,7 @@ class _PembeliState extends State<Pembeli> {
                       data['nama_usaha'],
                       data['nama'],
                       data['rute'],
+                      data['menu'],
                       data['latitude'],
                       data['longitude'],
                       data['uid']);
@@ -188,6 +190,7 @@ class _PembeliState extends State<Pembeli> {
       String nameMerchant,
       String name,
       List<dynamic> seluruhRute,
+      List<dynamic> menu,
       double latitude,
       double longitude,
       String uid) {
@@ -258,11 +261,11 @@ class _PembeliState extends State<Pembeli> {
                                 ),
                               ),
                               Padding(
-                                padding: const EdgeInsets.all(8.0),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 8.0, vertical: 4.0),
                                 child: Row(
                                   children: [
-                                    Spacer(), // Add Spacer here
-                                    ElevatedButton(
+                                    TextButton(
                                       onPressed: () {
                                         Navigator.pushReplacement(
                                           context,
@@ -275,20 +278,70 @@ class _PembeliState extends State<Pembeli> {
                                           ),
                                         );
                                       },
-                                      style: ElevatedButton.styleFrom(
+                                      style: TextButton.styleFrom(
                                         backgroundColor: Color(0xFFFEC901),
                                         shape: RoundedRectangleBorder(
                                           borderRadius:
                                               BorderRadius.circular(16.0),
                                         ),
-                                        elevation: 0,
-                                        shadowColor: Colors.transparent,
+                                        padding: EdgeInsets
+                                            .zero, // Removing all padding
+                                        minimumSize:
+                                            Size(50, 30), // Set a minimum size
+                                        tapTargetSize: MaterialTapTargetSize
+                                            .shrinkWrap, // Shrink wrap the tap target size
                                       ),
-                                      child: Text(
-                                        'Track',
-                                        style: TextStyle(
-                                          color: Color(0xFF060100),
-                                          fontWeight: FontWeight.bold,
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 18.0,
+                                            vertical:
+                                                4.0), // Add padding inside the child
+                                        child: Text(
+                                          'Rute',
+                                          style: TextStyle(
+                                            color: Color(0xFF060100),
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      width: 10,
+                                    ),
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.pushReplacement(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                ListMenuPesanan(menu: menu),
+                                          ),
+                                        );
+                                      },
+                                      style: TextButton.styleFrom(
+                                        backgroundColor: Color(0xFFFEC901),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(16.0),
+                                        ),
+                                        padding: EdgeInsets
+                                            .zero, // Removing all padding
+                                        minimumSize:
+                                            Size(50, 30), // Set a minimum size
+                                        tapTargetSize: MaterialTapTargetSize
+                                            .shrinkWrap, // Shrink wrap the tap target size
+                                      ),
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 18.0,
+                                            vertical:
+                                                4.0), // Add padding inside the child
+                                        child: Text(
+                                          'Pesan',
+                                          style: TextStyle(
+                                            color: Color(0xFF060100),
+                                            fontWeight: FontWeight.bold,
+                                          ),
                                         ),
                                       ),
                                     ),
