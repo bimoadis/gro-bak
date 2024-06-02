@@ -1,12 +1,15 @@
 import 'dart:async';
-
+import 'dart:typed_data';
+import 'dart:ui' as ui;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:gro_bak/helpers/gps.dart';
 import 'package:gro_bak/repository/getLongLat.dart';
+import 'package:gro_bak/view/list_menu_pembeli.dart';
 import 'package:gro_bak/view/rute_pedagang.dart';
 
 import 'login.dart';
@@ -24,6 +27,7 @@ class _PembeliState extends State<Pembeli> {
   Position? _userPosition;
   Exception? _exception;
   Timer? _timer;
+  BitmapDescriptor sourceIcon = BitmapDescriptor.defaultMarker;
 
   Completer<GoogleMapController> _controller = Completer();
   Future<List<Map<String, dynamic>>>? _combinedDataFuture;
@@ -33,7 +37,21 @@ class _PembeliState extends State<Pembeli> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Gro-bak"),
+        title: Text(
+          "Gro-bak",
+          style: TextStyle(
+            fontSize: 32,
+            color: Color(0xFFFEC901),
+            fontWeight: FontWeight.bold,
+            shadows: [
+              const Shadow(
+                offset: Offset(1.0, 1.0), // position of the shadow
+                blurRadius: 1.0, // blur effect
+                color: Color(0xFF060100), // semi-transparent black color
+              ),
+            ],
+          ),
+        ),
         actions: [
           IconButton(
             onPressed: () {
@@ -41,6 +59,7 @@ class _PembeliState extends State<Pembeli> {
             },
             icon: Icon(
               Icons.logout,
+              color: Color(0xFF060100),
             ),
           )
         ],
@@ -78,8 +97,16 @@ class _PembeliState extends State<Pembeli> {
   void initState() {
     super.initState();
     _gps.startPositionStream(_handlePositionStream);
+    setCustomMarkerIcon();
     _addMarkersFromFirestore();
-    _startPeriodicDataLoad();
+
+    // _startPeriodicDataLoad();
+  }
+
+  void _startPeriodicDataLoad() {
+    _timer = Timer.periodic(Duration(seconds: 10), (timer) {
+      _addMarkersFromFirestore();
+    });
   }
 
   void _handlePositionStream(Position position) async {
@@ -119,12 +146,6 @@ class _PembeliState extends State<Pembeli> {
     super.dispose();
   }
 
-  void _startPeriodicDataLoad() {
-    _timer = Timer.periodic(Duration(seconds: 10), (timer) {
-      _addMarkersFromFirestore();
-    });
-  }
-
   void _addMarkersFromFirestore() {
     setState(() {
       _combinedDataFuture = readMerchantData();
@@ -134,18 +155,19 @@ class _PembeliState extends State<Pembeli> {
       Set<Marker> markers = Set<Marker>();
       for (var data in combinedData) {
         if (data['latitude'] != '' && data['longitude'] != '') {
-          print(combinedData);
           try {
             LatLng position = LatLng(data['latitude'], data['longitude']);
             markers.add(
               Marker(
                 markerId: MarkerId(data['email']),
+                icon: sourceIcon, // Use the custom icon here
                 position: position,
                 onTap: () {
                   _showBottomSheet(
                       data['nama_usaha'],
                       data['nama'],
                       data['rute'],
+                      data['menu'],
                       data['latitude'],
                       data['longitude'],
                       data['uid']);
@@ -167,6 +189,7 @@ class _PembeliState extends State<Pembeli> {
       String nameMerchant,
       String name,
       List<dynamic> seluruhRute,
+      List<dynamic> menu,
       double latitude,
       double longitude,
       String uid) {
@@ -180,7 +203,8 @@ class _PembeliState extends State<Pembeli> {
               bottom: MediaQuery.of(context).viewInsets.bottom,
             ),
             child: Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 mainAxisSize: MainAxisSize.min,
@@ -210,14 +234,14 @@ class _PembeliState extends State<Pembeli> {
                           ),
                         ),
                       ),
-                      Container(
+                      Expanded(
                         child: Padding(
                           padding: const EdgeInsets.only(left: 10),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               SizedBox(
-                                height: 40,
+                                height: 10,
                               ),
                               SizedBox(
                                 height: 8,
@@ -226,20 +250,21 @@ class _PembeliState extends State<Pembeli> {
                                 nameMerchant,
                                 style: TextStyle(
                                   fontWeight: FontWeight.w700,
-                                  fontSize: 14,
+                                  fontSize: 20,
                                 ),
                               ),
                               Text(
                                 name,
                                 style: TextStyle(
-                                  fontSize: 11,
+                                  fontSize: 14,
                                 ),
                               ),
                               Padding(
-                                padding: const EdgeInsets.all(8.0),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 8.0, vertical: 4.0),
                                 child: Row(
                                   children: [
-                                    ElevatedButton(
+                                    TextButton(
                                       onPressed: () {
                                         Navigator.pushReplacement(
                                           context,
@@ -252,14 +277,73 @@ class _PembeliState extends State<Pembeli> {
                                           ),
                                         );
                                       },
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.blue,
+                                      style: TextButton.styleFrom(
+                                        backgroundColor: Color(0xFFFEC901),
                                         shape: RoundedRectangleBorder(
                                           borderRadius:
                                               BorderRadius.circular(16.0),
                                         ),
+                                        padding: EdgeInsets
+                                            .zero, // Removing all padding
+                                        minimumSize:
+                                            Size(50, 30), // Set a minimum size
+                                        tapTargetSize: MaterialTapTargetSize
+                                            .shrinkWrap, // Shrink wrap the tap target size
                                       ),
-                                      child: Text('Track'),
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 18.0,
+                                            vertical:
+                                                4.0), // Add padding inside the child
+                                        child: Text(
+                                          'Rute',
+                                          style: TextStyle(
+                                            color: Color(0xFF060100),
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      width: 10,
+                                    ),
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.pushReplacement(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                ListMenuPesanan(
+                                                    menu: menu, uid: uid),
+                                          ),
+                                        );
+                                      },
+                                      style: TextButton.styleFrom(
+                                        backgroundColor: Color(0xFFFEC901),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(16.0),
+                                        ),
+                                        padding: EdgeInsets
+                                            .zero, // Removing all padding
+                                        minimumSize:
+                                            Size(50, 30), // Set a minimum size
+                                        tapTargetSize: MaterialTapTargetSize
+                                            .shrinkWrap, // Shrink wrap the tap target size
+                                      ),
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 18.0,
+                                            vertical:
+                                                4.0), // Add padding inside the child
+                                        child: Text(
+                                          'Pesan',
+                                          style: TextStyle(
+                                            color: Color(0xFF060100),
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -277,5 +361,25 @@ class _PembeliState extends State<Pembeli> {
         );
       },
     );
+  }
+
+  void setCustomMarkerIcon() async {
+    final ByteData data =
+        await rootBundle.load("assets/images/shopping_cart.png");
+    final ui.Codec codec = await ui.instantiateImageCodec(
+      data.buffer.asUint8List(),
+      targetWidth: 100, // Set a slightly larger width
+      targetHeight: 100, // Set a slightly larger height
+    );
+    final ui.FrameInfo fi = await codec.getNextFrame();
+
+    final ByteData? resizedData =
+        await fi.image.toByteData(format: ui.ImageByteFormat.png);
+    if (resizedData != null) {
+      final Uint8List resizedBytes = resizedData.buffer.asUint8List();
+      setState(() {
+        sourceIcon = BitmapDescriptor.fromBytes(resizedBytes);
+      });
+    }
   }
 }

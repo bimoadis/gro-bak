@@ -1,25 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:gro_bak/view/add_rute_pedagang.dart';
+import 'package:gro_bak/view/add_menu_pedagang.dart';
 
-class ListRutePage extends StatefulWidget {
+class ListMenuPage extends StatefulWidget {
   @override
-  _ListRutePageState createState() => _ListRutePageState();
+  _ListMenuPageState createState() => _ListMenuPageState();
 }
 
-class _ListRutePageState extends State<ListRutePage> {
+class _ListMenuPageState extends State<ListMenuPage> {
   final _auth = FirebaseAuth.instance;
   FirebaseFirestore firestore = FirebaseFirestore.instance;
-  List<dynamic> ruteList = [];
+  List<dynamic> menuList = [];
 
   @override
   void initState() {
     super.initState();
-    _fetchRute();
+    _fetchMenu();
   }
 
-  Future<void> _fetchRute() async {
+  Future<void> _fetchMenu() async {
     var user = _auth.currentUser;
     if (user != null) {
       DocumentSnapshot docSnapshot =
@@ -27,7 +27,7 @@ class _ListRutePageState extends State<ListRutePage> {
 
       if (docSnapshot.exists) {
         setState(() {
-          ruteList = docSnapshot['rute'] ?? [];
+          menuList = docSnapshot['menu'] ?? [];
         });
       } else {
         print('Document does not exist');
@@ -37,10 +37,10 @@ class _ListRutePageState extends State<ListRutePage> {
     }
   }
 
-  void _navigateToAddRutePedagang() {
+  void _navigateToAddMenuPage() {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => AddRutePedagang(),
+        builder: (context) => MenuPedagang(),
       ),
     );
   }
@@ -49,22 +49,21 @@ class _ListRutePageState extends State<ListRutePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('List Rute'),
+        title: Text('List Menu'),
         centerTitle: true,
       ),
-      body: ruteList.isEmpty
+      body: menuList.isEmpty
           ? Center(child: CircularProgressIndicator())
           : ListView.builder(
-              itemCount: ruteList.length,
+              itemCount: menuList.length,
               itemBuilder: (context, index) {
-                var rute = ruteList[index];
+                var menu = menuList[index];
                 return Card(
                   margin: EdgeInsets.all(8.0),
                   child: ListTile(
-                    title: Text('Rute Dagang ${index + 1}.'),
+                    title: Text(menu['nama_produk'] ?? 'No Name'),
                     subtitle: Text(
-                      'Alamat : ${rute['address']}\n'
-                      'Perkiraan Waktu : ${rute['time']}\n',
+                      'Deskripsi: ${menu['deskripsi_produk']}\nHarga: ${menu['harga']}',
                     ),
                     isThreeLine: true,
                   ),
@@ -72,7 +71,7 @@ class _ListRutePageState extends State<ListRutePage> {
               },
             ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _navigateToAddRutePedagang,
+        onPressed: _navigateToAddMenuPage,
         child: Icon(Icons.add),
         backgroundColor: Colors.blue,
       ),

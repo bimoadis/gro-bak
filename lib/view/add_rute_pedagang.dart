@@ -5,6 +5,7 @@ import 'package:geocoding/geocoding.dart';
 import 'package:gro_bak/helpers/adress.dart';
 
 import 'package:gro_bak/repository/getAddress.dart';
+import 'package:gro_bak/view/widget/bottom_bar.dart';
 
 class AddRutePedagang extends StatefulWidget {
   @override
@@ -14,7 +15,11 @@ class AddRutePedagang extends StatefulWidget {
 class _AddRutePedagangState extends State<AddRutePedagang> {
   final _auth = FirebaseAuth.instance;
   final ApiService apiService = ApiService();
+  late TimeOfDay _selectedStartTime = TimeOfDay.now();
+  late TimeOfDay _selectedEndTime = TimeOfDay.now();
   final TextEditingController _addressController = TextEditingController();
+  final TextEditingController _startTimeController = TextEditingController();
+  final TextEditingController _endTimeController = TextEditingController();
 
   List<Region> provinces = [];
   List<Region> regencies = [];
@@ -25,9 +30,201 @@ class _AddRutePedagangState extends State<AddRutePedagang> {
   Region? selectedDistrict;
 
   @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Input Alamat'),
+        centerTitle: true,
+      ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              DropdownButtonFormField<Region>(
+                hint: Text('Pilih Provinsi'),
+                value: selectedProvince,
+                isExpanded: true,
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                items: provinces.map((Region province) {
+                  return DropdownMenuItem<Region>(
+                    value: province,
+                    child: Text(province.name,
+                        style: TextStyle(color: Colors.black)),
+                  );
+                }).toList(),
+                onChanged: (Region? newValue) {
+                  setState(() {
+                    selectedProvince = newValue;
+                    if (selectedProvince != null) {
+                      _fetchRegencies(selectedProvince!.id);
+                    }
+                  });
+                },
+                itemHeight: 48.0,
+                dropdownColor: Colors.white,
+              ),
+              SizedBox(height: 16.0),
+              DropdownButtonFormField<Region>(
+                hint: Text('Pilih Kabupaten/Kota'),
+                value: selectedRegency,
+                isExpanded: true,
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                items: regencies.map((Region regency) {
+                  return DropdownMenuItem<Region>(
+                    value: regency,
+                    child: Text(regency.name,
+                        style: TextStyle(color: Colors.black)),
+                  );
+                }).toList(),
+                onChanged: (Region? newValue) {
+                  setState(() {
+                    selectedRegency = newValue;
+                    if (selectedRegency != null) {
+                      _fetchDistricts(selectedRegency!.id);
+                    }
+                  });
+                },
+                itemHeight: 48.0,
+                dropdownColor: Colors.white,
+              ),
+              SizedBox(height: 16.0),
+              DropdownButtonFormField<Region>(
+                hint: Text('Pilih Kecamatan'),
+                value: selectedDistrict,
+                isExpanded: true,
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                items: districts.map((Region district) {
+                  return DropdownMenuItem<Region>(
+                    value: district,
+                    child: Text(district.name,
+                        style: TextStyle(color: Colors.black)),
+                  );
+                }).toList(),
+                onChanged: (Region? newValue) {
+                  setState(() {
+                    selectedDistrict = newValue;
+                  });
+                },
+                itemHeight: 48.0,
+                dropdownColor: Colors.white,
+              ),
+              SizedBox(height: 16.0),
+              TextField(
+                controller: _addressController,
+                decoration: InputDecoration(
+                  hintText: 'Nama Jalan, Gedung, No. Rumah',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              ),
+              SizedBox(height: 16.0),
+              Row(
+                children: [
+                  Expanded(
+                    child: Padding(
+                      padding: EdgeInsets.only(right: 8.0),
+                      child: TextField(
+                        controller: _startTimeController,
+                        onTap: () {
+                          _selectStartTime(context);
+                        },
+                        decoration: InputDecoration(
+                          hintText: 'Waktu Mulai',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Padding(
+                      padding: EdgeInsets.only(left: 8.0),
+                      child: TextField(
+                        controller: _endTimeController,
+                        onTap: () {
+                          _selectEndTime(context);
+                        },
+                        decoration: InputDecoration(
+                          hintText: 'Waktu Selesai',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 16.0),
+              ElevatedButton(
+                onPressed: _saveAddress,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Color(0xFFFEC901),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                ),
+                child: Text(
+                  'Simpan Alamat',
+                  style: TextStyle(
+                    color: Color(0xFF060100),
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
   void initState() {
     super.initState();
     _fetchProvinces();
+  }
+
+  Future<void> _selectStartTime(BuildContext context) async {
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: _selectedStartTime,
+    );
+    if (picked != null && picked != _selectedStartTime) {
+      setState(() {
+        _selectedStartTime = picked;
+        _startTimeController.text = _selectedStartTime.format(context);
+      });
+    }
+  }
+
+  Future<void> _selectEndTime(BuildContext context) async {
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: _selectedEndTime,
+    );
+    if (picked != null && picked != _selectedEndTime) {
+      setState(() {
+        _selectedEndTime = picked;
+        _endTimeController.text = _selectedEndTime.format(context);
+      });
+    }
   }
 
   Future<void> _fetchProvinces() async {
@@ -71,7 +268,9 @@ class _AddRutePedagangState extends State<AddRutePedagang> {
     if (selectedProvince == null ||
         selectedRegency == null ||
         selectedDistrict == null ||
-        _addressController.text.isEmpty) {
+        _addressController.text.isEmpty ||
+        _startTimeController.text.isEmpty ||
+        _endTimeController.text.isEmpty) {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text('Please fill all fields')));
       return;
@@ -98,16 +297,28 @@ class _AddRutePedagangState extends State<AddRutePedagang> {
           DocumentSnapshot docSnapshot = await ref.doc(user.uid).get();
 
           List<dynamic> rute = docSnapshot['rute'] ?? [];
+
+          String startTime = _startTimeController.text;
+          String endTime = _endTimeController.text;
+          String time = '${startTime} sampai ${endTime}';
+
           rute.add({
             "name": fullAddress,
             "latitude": latitude,
             "longitude": longitude,
             "address": fullAddress,
+            "time": time,
           });
 
           await ref.doc(user.uid).update({'rute': rute});
-          ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Address saved successfully')));
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(
+              builder: (context) => BottomNavBar(),
+            ),
+            (Route<dynamic> route) =>
+                false, // Menghapus semua halaman sebelumnya
+          );
         } else {
           print('User is not logged in');
           ScaffoldMessenger.of(context)
@@ -123,124 +334,5 @@ class _AddRutePedagangState extends State<AddRutePedagang> {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text('Failed to save address')));
     }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Input Alamat'),
-        centerTitle: true,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            DropdownButtonFormField<Region>(
-              hint: Text('Pilih Provinsi'),
-              value: selectedProvince,
-              isExpanded: true,
-              decoration: InputDecoration(
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              items: provinces.map((Region province) {
-                return DropdownMenuItem<Region>(
-                  value: province,
-                  child: Text(province.name,
-                      style: TextStyle(color: Colors.black)),
-                );
-              }).toList(),
-              onChanged: (Region? newValue) {
-                setState(() {
-                  selectedProvince = newValue;
-                  if (selectedProvince != null) {
-                    _fetchRegencies(selectedProvince!.id);
-                  }
-                });
-              },
-              itemHeight: 48.0,
-              dropdownColor: Colors.white,
-            ),
-            SizedBox(height: 16.0),
-            DropdownButtonFormField<Region>(
-              hint: Text('Pilih Kabupaten/Kota'),
-              value: selectedRegency,
-              isExpanded: true,
-              decoration: InputDecoration(
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              items: regencies.map((Region regency) {
-                return DropdownMenuItem<Region>(
-                  value: regency,
-                  child:
-                      Text(regency.name, style: TextStyle(color: Colors.black)),
-                );
-              }).toList(),
-              onChanged: (Region? newValue) {
-                setState(() {
-                  selectedRegency = newValue;
-                  if (selectedRegency != null) {
-                    _fetchDistricts(selectedRegency!.id);
-                  }
-                });
-              },
-              itemHeight: 48.0,
-              dropdownColor: Colors.white,
-            ),
-            SizedBox(height: 16.0),
-            DropdownButtonFormField<Region>(
-              hint: Text('Pilih Kecamatan'),
-              value: selectedDistrict,
-              isExpanded: true,
-              decoration: InputDecoration(
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              items: districts.map((Region district) {
-                return DropdownMenuItem<Region>(
-                  value: district,
-                  child: Text(district.name,
-                      style: TextStyle(color: Colors.black)),
-                );
-              }).toList(),
-              onChanged: (Region? newValue) {
-                setState(() {
-                  selectedDistrict = newValue;
-                });
-              },
-              itemHeight: 48.0,
-              dropdownColor: Colors.white,
-            ),
-            SizedBox(height: 16.0),
-            TextField(
-              controller: _addressController,
-              decoration: InputDecoration(
-                hintText: 'Nama Jalan, Gedung, No. Rumah',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-            ),
-            SizedBox(height: 16.0),
-            ElevatedButton(
-              onPressed: _saveAddress,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-              ),
-              child: Text('Simpan Alamat'),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 }

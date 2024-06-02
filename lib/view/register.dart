@@ -45,18 +45,45 @@ class _RegisterState extends State<Register> {
         },
         child: SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 15),
+            padding: const EdgeInsets.symmetric(horizontal: 24),
             child: Form(
               key: _formKey,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  SizedBox(height: 100),
+                  SizedBox(height: 105),
                   Text(
-                    "Sign Up",
-                    style: TextStyle(fontSize: 27, fontWeight: FontWeight.bold),
+                    'Daftar akun',
+                    style: TextStyle(
+                      fontSize: 42, // Equivalent to text-4xl in Tailwind CSS
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF060100),
+                    ),
                   ),
-                  SizedBox(height: 30),
+                  SizedBox(height: 15),
+                  RichText(
+                    text: TextSpan(
+                      children: [
+                        TextSpan(
+                          text: 'Silahkan daftar sesuai dengan ',
+                          style: TextStyle(
+                            color: Colors
+                                .grey, // Equivalent to text-zinc-500 in Tailwind CSS
+                            fontSize: 14,
+                          ),
+                        ),
+                        TextSpan(
+                          text: 'kebutuhan!',
+                          style: TextStyle(
+                            color: Color(0xFF060100),
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 8),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -68,11 +95,20 @@ class _RegisterState extends State<Register> {
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor:
-                              _role == "Pembeli" ? Colors.blue : null,
+                              _role == "Pembeli" ? Color(0xFFFEC901) : null,
+                          elevation: 0,
+                          shadowColor: Colors.transparent,
                         ),
-                        child: Text("Pembeli"),
+                        child: Text(
+                          "Pembeli",
+                          style: TextStyle(
+                            color: _role == "Pembeli"
+                                ? Color(0xFF060100)
+                                : Colors.grey,
+                          ),
+                        ),
                       ),
-                      SizedBox(width: 10),
+                      SizedBox(width: 20),
                       ElevatedButton(
                         onPressed: () {
                           setState(() {
@@ -81,13 +117,22 @@ class _RegisterState extends State<Register> {
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor:
-                              _role == "Pedagang" ? Colors.blue : null,
+                              _role == "Pedagang" ? Color(0xFFFEC901) : null,
+                          elevation: 0,
+                          shadowColor: Colors.transparent,
                         ),
-                        child: Text("Pedagang"),
+                        child: Text(
+                          "Pedagang",
+                          style: TextStyle(
+                            color: _role == "Pedagang"
+                                ? Color(0xFF060100)
+                                : Colors.grey,
+                          ),
+                        ),
                       ),
                     ],
                   ),
-                  SizedBox(height: 30),
+                  SizedBox(height: 20),
                   FormContainerWidget(
                     controller: _usernameController,
                     hintText: "Username",
@@ -124,19 +169,29 @@ class _RegisterState extends State<Register> {
                   GestureDetector(
                     onTap: () {
                       _signUp(
-                        email: _emailController.text,
+                        email: _emailController.text.isNotEmpty
+                            ? _emailController.text
+                            : null,
                         role: _role,
-                        password: _passwordController.text,
-                        namaUsaha: _namaUsahaController.text,
-                        username: _usernameController.text,
-                        nomorTelepon: _nomorTeleponController.text,
+                        password: _passwordController.text.isNotEmpty
+                            ? _passwordController.text
+                            : null,
+                        namaUsaha: _namaUsahaController.text.isNotEmpty
+                            ? _namaUsahaController.text
+                            : null,
+                        username: _usernameController.text.isNotEmpty
+                            ? _usernameController.text
+                            : null,
+                        nomorTelepon: _nomorTeleponController.text.isNotEmpty
+                            ? _nomorTeleponController.text
+                            : null,
                       );
                     },
                     child: Container(
                       width: double.infinity,
                       height: 45,
                       decoration: BoxDecoration(
-                        color: Colors.blue,
+                        color: Color(0xFFFEC901),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Center(
@@ -147,7 +202,7 @@ class _RegisterState extends State<Register> {
                             : Text(
                                 "Sign Up",
                                 style: TextStyle(
-                                    color: Colors.white,
+                                    color: Color(0xFF060100),
                                     fontWeight: FontWeight.bold),
                               ),
                       ),
@@ -157,7 +212,7 @@ class _RegisterState extends State<Register> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text("Already have an account?"),
+                      Text("Sudah memiliki akun?"),
                       SizedBox(width: 5),
                       GestureDetector(
                         onTap: () {
@@ -171,7 +226,18 @@ class _RegisterState extends State<Register> {
                         child: Text(
                           "Login",
                           style: TextStyle(
-                              color: Colors.blue, fontWeight: FontWeight.bold),
+                            color: Color(0xFFFEC901), // Yellow color for text
+                            fontWeight: FontWeight.bold,
+                            shadows: [
+                              Shadow(
+                                offset: Offset(
+                                    0.25, 0.25), // position of the shadow
+                                blurRadius: 0.25, // blur effect
+                                color: Color.fromARGB(
+                                    128, 0, 0, 0), //ent black color
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ],
@@ -186,18 +252,22 @@ class _RegisterState extends State<Register> {
     );
   }
 
-  void _signUp(
-      {required String email,
-      required String password,
-      required String role,
-      required String namaUsaha,
-      required String username,
-      required String nomorTelepon}) async {
+  void _signUp({
+    required String? email,
+    required String? password,
+    required String role,
+    required String? namaUsaha,
+    required String? username,
+    required String? nomorTelepon,
+  }) async {
     if (_formKey.currentState!.validate()) {
       setState(() {
         isSigningUp = true;
       });
       try {
+        if (email == null || password == null || username == null) {
+          throw Exception("Required fields are missing");
+        }
         await _firebaseAuth.createUserWithEmailAndPassword(
           email: email,
           password: password,
@@ -221,13 +291,14 @@ class _RegisterState extends State<Register> {
   }
 
   Future<void> createMerchant(
-      String uid, String namaUsaha, String nomorTelepon) async {
+      String uid, String? namaUsaha, String? nomorTelepon) async {
     DocumentReference merchantDocRef =
         FirebaseFirestore.instance.collection('merchant').doc(uid);
     await merchantDocRef.set({
-      'nama_usaha': namaUsaha,
-      'nomor_telepon': nomorTelepon,
+      'nama_usaha': namaUsaha ?? '',
+      'nomor_telepon': nomorTelepon ?? '',
       'rute': [],
+      'menu': [],
       'status': 'tutup',
     });
   }

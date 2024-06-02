@@ -1,6 +1,9 @@
 import 'dart:async';
+import 'dart:typed_data';
+import 'dart:ui' as ui;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 
@@ -29,12 +32,18 @@ class _RutePedagangState extends State<RutePedagang> {
   Map<String, dynamic>? _merchantData;
   Timer? _timer;
 
+  // Ikon kustom
+  BitmapDescriptor? shoppingCartIcon;
+  BitmapDescriptor? martIcon;
+
   @override
   void initState() {
     super.initState();
+    _setCustomMarkerIcons();
     _loadMerchantData();
+
     _addMarkers(widget.seluruhRute);
-    _startPeriodicDataLoad();
+    // _startPeriodicDataLoad();
   }
 
   @override
@@ -57,14 +66,66 @@ class _RutePedagangState extends State<RutePedagang> {
           .get();
 
       if (merchantDoc.exists) {
-        setState(() {
-          _merchantData = merchantDoc.data() as Map<String, dynamic>;
-        });
-        print(
-            'User latitude and longitude jabdiahdibin: ${_merchantData?['latitude']}, ${_merchantData?['longitude']}');
+        if (mounted) {
+          setState(() {
+            _merchantData = merchantDoc.data() as Map<String, dynamic>;
+          });
+          print(
+              'User latitude and longitude: ${_merchantData?['latitude']}, ${_merchantData?['longitude']}');
+          _updateInitialMarker(
+              _merchantData!['latitude'], _merchantData!['longitude']);
+        }
       }
     } catch (e) {
       print('Error fetching merchant data: $e');
+    }
+  }
+
+  Future<void> _setCustomMarkerIcons() async {
+    shoppingCartIcon =
+        await _createCustomMarkerIcon('assets/images/shopping_cart.png');
+    martIcon = await _createCustomMarkerIcon('assets/images/mart.png');
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  Future<BitmapDescriptor> _createCustomMarkerIcon(String assetPath) async {
+    final ByteData data = await rootBundle.load(assetPath);
+    final ui.Codec codec = await ui.instantiateImageCodec(
+      data.buffer.asUint8List(),
+      targetWidth: 100, // Ukuran ikon yang diinginkan
+      targetHeight: 100,
+    );
+    final ui.FrameInfo fi = await codec.getNextFrame();
+    final ByteData? resizedData =
+        await fi.image.toByteData(format: ui.ImageByteFormat.png);
+
+    if (resizedData != null) {
+      final Uint8List resizedBytes = resizedData.buffer.asUint8List();
+      return BitmapDescriptor.fromBytes(resizedBytes);
+    } else {
+      return BitmapDescriptor.defaultMarker;
+    }
+  }
+
+  void _updateInitialMarker(double latitude, double longitude) {
+    LatLng newPosition = LatLng(latitude, longitude);
+    Marker marker = Marker(
+      markerId: MarkerId('initial_position'),
+      position: newPosition,
+      icon: shoppingCartIcon ??
+          BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+    );
+
+    if (mounted) {
+      setState(() {
+        _markers.removeWhere(
+            (marker) => marker.markerId.value == 'initial_position');
+        _markers.add(marker);
+      });
+
+      _moveCamera(newPosition);
     }
   }
 
@@ -114,12 +175,15 @@ class _RutePedagangState extends State<RutePedagang> {
     Marker marker = Marker(
       markerId: MarkerId('initial_position'),
       position: initialPosition,
-      icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+      icon: shoppingCartIcon ??
+          BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
     );
 
-    setState(() {
-      _markers.add(marker);
-    });
+    if (mounted) {
+      setState(() {
+        _markers.add(marker);
+      });
+    }
 
     _moveCamera(initialPosition);
   }
@@ -147,15 +211,19 @@ class _RutePedagangState extends State<RutePedagang> {
         Marker marker = Marker(
           markerId: MarkerId(coordinate.toString()),
           position: coordinate,
-          icon: BitmapDescriptor.defaultMarker,
+          icon: martIcon ??
+              BitmapDescriptor.defaultMarkerWithHue(
+                  BitmapDescriptor.hueBlue), // Gunakan ikon kustom
         );
         markers.add(marker);
       }
     }
 
-    setState(() {
-      _markers.addAll(markers);
-    });
+    if (mounted) {
+      setState(() {
+        _markers.addAll(markers);
+      });
+    }
   }
 
   Future<List<LatLng>> _fetchPolylinePoints(double startLatitude,
@@ -196,96 +264,112 @@ class _RutePedagangState extends State<RutePedagang> {
       width: 5,
     );
 
-    setState(() {
-      _polylines.add(polyline);
-    });
+    if (mounted) {
+      setState(() {
+        _polylines.add(polyline);
+      });
+    }
   }
 
   Widget _buildDetailsContainer() {
     return Expanded(
       flex: 1,
-      child: Container(
-        color: Colors.white,
-        padding: EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              child: Text(
-                'Detail Pedagang',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
+      child: ClipRRect(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(34.0), // Set top-left corner radius
+          topRight: Radius.circular(34.0), // Set top-right corner radius
+        ),
+        child: Container(
+          color: Colors.white,
+          padding: EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: Text(
+                  'Detail Pedagang',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
-            ),
-            Row(
-              children: [
-                Card(
-                  child: Container(
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(8.0),
-                      child: Image.asset(
-                        'assets/images/bakso.jpeg',
-                        width: 120,
-                        height: 90,
-                        fit: BoxFit.cover,
+              Row(
+                children: [
+                  Card(
+                    child: Container(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8.0),
+                        child: Image.asset(
+                          'assets/images/bakso.jpeg',
+                          width: 120,
+                          height: 90,
+                          fit: BoxFit.cover,
+                        ),
                       ),
                     ),
                   ),
-                ),
-                Container(
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 10),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SizedBox(
-                          height: 40,
-                        ),
-                        SizedBox(
-                          height: 8,
-                        ),
-                        Text(
-                          widget.namaPemilik,
-                          style: TextStyle(
-                            fontWeight: FontWeight.w700,
-                            fontSize: 14,
+                  Container(
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 10),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SizedBox(
+                            height: 10,
                           ),
-                        ),
-                        Text(
-                          widget.namaUsaha,
-                          style: TextStyle(
-                            fontSize: 11,
+                          SizedBox(
+                            height: 8,
                           ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Row(
-                            children: [
-                              ElevatedButton(
-                                onPressed: () {
-                                  // Do something with the entire route data
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.blue,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(16.0),
+                          Text(
+                            widget.namaPemilik,
+                            style: TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 20,
+                            ),
+                          ),
+                          Text(
+                            widget.namaUsaha,
+                            style: TextStyle(
+                              fontSize: 14,
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Row(
+                              children: [
+                                ElevatedButton(
+                                  onPressed: () {
+                                    // Do something with the entire route data
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Color(0xFFFEC901),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(16.0),
+                                    ),
+                                    elevation: 0,
+                                    shadowColor: Colors.transparent,
+                                  ),
+                                  child: Text(
+                                    'Track',
+                                    style: TextStyle(
+                                      color: Color(0xFF060100),
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                 ),
-                                child: Text('Track'),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
-          ],
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
