@@ -70,10 +70,12 @@ class _LoginPageState extends State<LoginPage> {
                 SizedBox(height: 30),
                 GestureDetector(
                   onTap: () {
-                    setState(() {
-                      _isSigning = true;
-                    });
-                    signIn(_emailController.text, _passwordController.text);
+                    if (_formKey.currentState!.validate()) {
+                      setState(() {
+                        _isSigning = true;
+                      });
+                      signIn(_emailController.text, _passwordController.text);
+                    }
                   },
                   child: Container(
                     width: double.infinity,
@@ -131,11 +133,12 @@ class _LoginPageState extends State<LoginPage> {
 
   void route() async {
     User? user = FirebaseAuth.instance.currentUser;
-    var kk = FirebaseFirestore.instance
-        .collection('users')
-        .doc(user!.uid)
-        .get()
-        .then((DocumentSnapshot documentSnapshot) {
+    try {
+      DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user!.uid)
+          .get();
+
       if (documentSnapshot.exists) {
         if (documentSnapshot.get('role') == "Pedagang") {
           Navigator.pushReplacement(
@@ -154,8 +157,17 @@ class _LoginPageState extends State<LoginPage> {
         }
       } else {
         print('Document does not exist on the database');
+        setState(() {
+          _isSigning = false;
+        });
       }
-    });
+    } catch (e) {
+      print('Exception in route: $e');
+      setState(() {
+        _isSigning = false;
+      });
+      _showErrorDialog('Failed to fetch user data. Please try again.');
+    }
   }
 
   void signIn(String email, String password) async {
@@ -168,12 +180,40 @@ class _LoginPageState extends State<LoginPage> {
         );
         route();
       } on FirebaseAuthException catch (e) {
-        if (e.code == 'user-not-found') {
-          print('No user found for that email.');
-        } else if (e.code == 'wrong-password') {
-          print('Wrong password provided for that user.');
-        }
+        print('FirebaseAuthException code: ${e.code}');
+        setState(() {
+          _isSigning = false;
+        });
+        _showErrorDialog(e.message);
+      } catch (e) {
+        print('Exception: $e');
+        setState(() {
+          _isSigning = false;
+        });
+        _showErrorDialog(e.toString());
       }
+    } else {
+      setState(() {
+        _isSigning = false;
+      });
     }
+  }
+
+  void _showErrorDialog(String? message) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('Error'),
+        content: Text(message ?? 'An unknown error occurred'),
+        actions: <Widget>[
+          TextButton(
+            child: Text('Okay'),
+            onPressed: () {
+              Navigator.of(ctx).pop();
+            },
+          )
+        ],
+      ),
+    );
   }
 }

@@ -170,7 +170,8 @@ class _PembeliState extends State<Pembeli> {
                       data['menu'],
                       data['latitude'],
                       data['longitude'],
-                      data['uid']);
+                      data['uid'],
+                      user!.uid);
                 },
               ),
             );
@@ -192,7 +193,8 @@ class _PembeliState extends State<Pembeli> {
       List<dynamic> menu,
       double latitude,
       double longitude,
-      String uid) {
+      String uidPedagang,
+      String uidPembeli) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -270,10 +272,13 @@ class _PembeliState extends State<Pembeli> {
                                           context,
                                           MaterialPageRoute(
                                             builder: (context) => RutePedagang(
-                                                seluruhRute: seluruhRute,
-                                                namaPemilik: name,
-                                                namaUsaha: nameMerchant,
-                                                uid: uid),
+                                              seluruhRute: seluruhRute,
+                                              namaPemilik: name,
+                                              namaUsaha: nameMerchant,
+                                              uidPedagang: uidPedagang,
+                                              uidPembeli: uidPembeli,
+                                              menu: menu,
+                                            ),
                                           ),
                                         );
                                       },
@@ -314,7 +319,10 @@ class _PembeliState extends State<Pembeli> {
                                           MaterialPageRoute(
                                             builder: (context) =>
                                                 ListMenuPesanan(
-                                                    menu: menu, uid: uid),
+                                              menu: menu,
+                                              uidPedagang: uidPedagang,
+                                              uidPembeli: uidPembeli,
+                                            ),
                                           ),
                                         );
                                       },

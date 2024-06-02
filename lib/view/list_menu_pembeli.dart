@@ -5,12 +5,14 @@ import 'package:gro_bak/view/add_menu_pedagang.dart';
 
 class ListMenuPesanan extends StatefulWidget {
   final List<dynamic> menu;
-  final String uid;
+  final String uidPedagang;
+  final String uidPembeli;
 
   const ListMenuPesanan({
     Key? key,
     required this.menu,
-    required this.uid,
+    required this.uidPedagang,
+    required this.uidPembeli,
   }) : super(key: key);
 
   @override
@@ -50,10 +52,49 @@ class _ListMenuPesananState extends State<ListMenuPesanan> {
                       'Deskripsi: ${menu['deskripsi_produk']}\nHarga: ${menu['harga']}',
                     ),
                     isThreeLine: true,
+                    trailing: ElevatedButton(
+                      onPressed: () {
+                        _showOrderDialog(menu['nama_produk'], menu['harga']);
+                      },
+                      child: Text('Pesan'),
+                    ),
                   ),
                 );
               },
             ),
+    );
+  }
+
+  void _showOrderDialog(String productName, String price) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Konfirmasi Pesanan'),
+          content: Text(
+              'Apakah Anda yakin ingin memesan $productName seharga $price?'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Batal'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('Pesan'),
+              onPressed: () {
+                // Implement order logic here
+                Navigator.of(context).pop();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                      content:
+                          Text('Pesanan untuk $productName telah dilakukan.')),
+                );
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }

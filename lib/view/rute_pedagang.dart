@@ -6,19 +6,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
+import 'package:gro_bak/view/list_menu_pembeli.dart';
 
 class RutePedagang extends StatefulWidget {
   final List<dynamic> seluruhRute;
+  final List<dynamic> menu;
   final String namaUsaha;
   final String namaPemilik;
-  final String uid;
+  final String uidPedagang;
+  final String uidPembeli;
 
   const RutePedagang(
       {Key? key,
+      required this.menu,
       required this.seluruhRute,
       required this.namaUsaha,
       required this.namaPemilik,
-      required this.uid})
+      required this.uidPedagang,
+      required this.uidPembeli})
       : super(key: key);
 
   @override
@@ -62,7 +67,7 @@ class _RutePedagangState extends State<RutePedagang> {
     try {
       DocumentSnapshot merchantDoc = await FirebaseFirestore.instance
           .collection('users')
-          .doc(widget.uid)
+          .doc(widget.uidPedagang)
           .get();
 
       if (merchantDoc.exists) {
@@ -339,23 +344,42 @@ class _RutePedagangState extends State<RutePedagang> {
                             padding: const EdgeInsets.all(8.0),
                             child: Row(
                               children: [
-                                ElevatedButton(
+                                TextButton(
                                   onPressed: () {
-                                    // Do something with the entire route data
+                                    Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => ListMenuPesanan(
+                                          menu: widget.menu,
+                                          uidPedagang: widget.uidPedagang,
+                                          uidPembeli: widget.uidPembeli,
+                                        ),
+                                      ),
+                                    );
                                   },
-                                  style: ElevatedButton.styleFrom(
+                                  style: TextButton.styleFrom(
                                     backgroundColor: Color(0xFFFEC901),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(16.0),
                                     ),
-                                    elevation: 0,
-                                    shadowColor: Colors.transparent,
+                                    padding:
+                                        EdgeInsets.zero, // Removing all padding
+                                    minimumSize:
+                                        Size(50, 30), // Set a minimum size
+                                    tapTargetSize: MaterialTapTargetSize
+                                        .shrinkWrap, // Shrink wrap the tap target size
                                   ),
-                                  child: Text(
-                                    'Track',
-                                    style: TextStyle(
-                                      color: Color(0xFF060100),
-                                      fontWeight: FontWeight.bold,
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 18.0,
+                                        vertical:
+                                            4.0), // Add padding inside the child
+                                    child: Text(
+                                      'Pesan',
+                                      style: TextStyle(
+                                        color: Color(0xFF060100),
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
                                   ),
                                 ),
