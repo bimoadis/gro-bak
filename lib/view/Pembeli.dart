@@ -7,6 +7,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:gro_bak/helpers/gps.dart';
 import 'package:gro_bak/repository/getLongLat.dart';
+import 'package:gro_bak/view/rute_pedagang.dart';
 
 import 'login.dart';
 
@@ -22,15 +23,17 @@ class _PembeliState extends State<Pembeli> {
   final GPS _gps = GPS();
   Position? _userPosition;
   Exception? _exception;
+  Timer? _timer;
 
   Completer<GoogleMapController> _controller = Completer();
-  List<Marker> _markers = []; // Change to List<Marker>
+  Future<List<Map<String, dynamic>>>? _combinedDataFuture;
+  Set<Marker> _markers = Set<Marker>();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Pembeli"),
+        title: Text("Gro-bak"),
         actions: [
           IconButton(
             onPressed: () {
@@ -47,12 +50,15 @@ class _PembeliState extends State<Pembeli> {
           target: LatLng(-7.27562362979344, 112.79377717822462),
           zoom: 15,
         ),
-        markers:
-            Set<Marker>.from(_markers), // Set the markers for the GoogleMap
+        markers: Set<Marker>.from(_markers),
         onMapCreated: (GoogleMapController controller) {
           _controller.complete(controller);
         },
         myLocationEnabled: true,
+        zoomControlsEnabled: false,
+        compassEnabled: false,
+        myLocationButtonEnabled: false,
+        mapToolbarEnabled: false,
       ),
     );
   }
@@ -72,7 +78,8 @@ class _PembeliState extends State<Pembeli> {
   void initState() {
     super.initState();
     _gps.startPositionStream(_handlePositionStream);
-    _addMarkersFromFirestore(); // Call directly here
+    _addMarkersFromFirestore();
+    _startPeriodicDataLoad();
   }
 
   void _handlePositionStream(Position position) async {
@@ -106,37 +113,63 @@ class _PembeliState extends State<Pembeli> {
     );
   }
 
-  void _addMarkersFromFirestore() {
-    final getLongLat = GetLongLat();
-    getLongLat.getUsersStream().listen((List<Map<String, dynamic>> users) {
-      print('Received users data from Firestore: $users');
-      users.forEach((user) {
-        final String fullName = user['fullName'];
-        final double latitude = user['latitude'];
-        final double longitude = user['longitude'];
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
 
-        if (latitude != null && longitude != null) {
-          bool markerExists =
-              _markers.any((marker) => marker.markerId.value == fullName);
-          if (!markerExists) {
-            setState(() {
-              _markers.add(
-                Marker(
-                  markerId: MarkerId(fullName),
-                  position: LatLng(latitude, longitude),
-                  onTap: () {
-                    _showBottomSheet(fullName);
-                  },
-                ),
-              );
-            });
+  void _startPeriodicDataLoad() {
+    _timer = Timer.periodic(Duration(seconds: 10), (timer) {
+      _addMarkersFromFirestore();
+    });
+  }
+
+  void _addMarkersFromFirestore() {
+    setState(() {
+      _combinedDataFuture = readMerchantData();
+    });
+
+    _combinedDataFuture!.then((combinedData) {
+      Set<Marker> markers = Set<Marker>();
+      for (var data in combinedData) {
+        if (data['latitude'] != '' && data['longitude'] != '') {
+          print(combinedData);
+          try {
+            LatLng position = LatLng(data['latitude'], data['longitude']);
+            markers.add(
+              Marker(
+                markerId: MarkerId(data['email']),
+                position: position,
+                onTap: () {
+                  _showBottomSheet(
+                      data['nama_usaha'],
+                      data['nama'],
+                      data['rute'],
+                      data['latitude'],
+                      data['longitude'],
+                      data['uid']);
+                },
+              ),
+            );
+          } catch (e) {
+            print('Error parsing latitude/longitude: $e');
           }
         }
+      }
+      setState(() {
+        _markers = markers;
       });
     });
   }
 
-  void _showBottomSheet(String fullName) {
+  void _showBottomSheet(
+      String nameMerchant,
+      String name,
+      List<dynamic> seluruhRute,
+      double latitude,
+      double longitude,
+      String uid) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -152,29 +185,90 @@ class _PembeliState extends State<Pembeli> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
-                  Text(
-                    fullName,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Text(
+                      'Detail Pedagang',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
-                  SizedBox(height: 20),
-                  // Add a ListView for scrollable content
-                  ListView(
-                    shrinkWrap: true,
-                    physics:
-                        NeverScrollableScrollPhysics(), // Prevent ListView from scrolling
+                  Row(
                     children: [
-                      Text('Additional information can be displayed here.'),
+                      Card(
+                        child: Container(
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(8.0),
+                            child: Image.asset(
+                              'assets/images/bakso.jpeg',
+                              width: 120,
+                              height: 90,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
+                      ),
+                      Container(
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 10),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              SizedBox(
+                                height: 40,
+                              ),
+                              SizedBox(
+                                height: 8,
+                              ),
+                              Text(
+                                nameMerchant,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              Text(
+                                name,
+                                style: TextStyle(
+                                  fontSize: 11,
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Row(
+                                  children: [
+                                    ElevatedButton(
+                                      onPressed: () {
+                                        Navigator.pushReplacement(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => RutePedagang(
+                                                seluruhRute: seluruhRute,
+                                                namaPemilik: name,
+                                                namaUsaha: nameMerchant,
+                                                uid: uid),
+                                          ),
+                                        );
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.blue,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(16.0),
+                                        ),
+                                      ),
+                                      child: Text('Track'),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
                     ],
-                  ),
-                  SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: Text('Close'),
                   ),
                 ],
               ),
