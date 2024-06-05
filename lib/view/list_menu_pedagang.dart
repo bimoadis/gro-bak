@@ -53,7 +53,21 @@ class _ListMenuPageState extends State<ListMenuPage> {
         centerTitle: true,
       ),
       body: menuList.isEmpty
-          ? Center(child: CircularProgressIndicator())
+          ? Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Center(
+                  child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                    Text(
+                      "Tambahkan Menu ",
+                      style: TextStyle(
+                        fontSize: 30,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ])),
+            )
           : ListView.builder(
               itemCount: menuList.length,
               itemBuilder: (context, index) {

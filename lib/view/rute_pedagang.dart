@@ -375,7 +375,7 @@ class _RutePedagangState extends State<RutePedagang> {
                                         vertical:
                                             4.0), // Add padding inside the child
                                     child: Text(
-                                      'Pesan',
+                                      'Menu',
                                       style: TextStyle(
                                         color: Color(0xFF060100),
                                         fontWeight: FontWeight.bold,

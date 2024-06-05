@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:gro_bak/view/add_menu_pedagang.dart';
+import 'package:gro_bak/view/pesanan_pembeli.dart';
 
 class ListMenuPesanan extends StatefulWidget {
   final List<dynamic> menu;
@@ -40,61 +40,71 @@ class _ListMenuPesananState extends State<ListMenuPesanan> {
       ),
       body: menuList.isEmpty
           ? Center(child: CircularProgressIndicator())
-          : ListView.builder(
-              itemCount: menuList.length,
-              itemBuilder: (context, index) {
-                var menu = menuList[index];
-                return Card(
-                  margin: EdgeInsets.all(8.0),
-                  child: ListTile(
-                    title: Text(menu['nama_produk'] ?? 'No Name'),
-                    subtitle: Text(
-                      'Deskripsi: ${menu['deskripsi_produk']}\nHarga: ${menu['harga']}',
+          : Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: ListView.builder(
+                itemCount: menuList.length,
+                itemBuilder: (context, index) {
+                  var menu = menuList[index];
+                  return Card(
+                    margin: EdgeInsets.all(8.0),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        children: [
+                          Row(
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(8.0),
+                                child: Image.asset(
+                                  'assets/images/bakso.jpeg',
+                                  width: 120,
+                                  height: 90,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                              SizedBox(width: 10),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(menu['nama_produk'] ?? 'No Name'),
+                                    Text(
+                                      'Deskripsi: ${menu['deskripsi_produk']}',
+                                      style: TextStyle(color: Colors.grey[600]),
+                                    ),
+                                    Text(
+                                      'Harga: ${menu['harga']}',
+                                      style: TextStyle(color: Colors.grey[600]),
+                                    ),
+                                    SizedBox(height: 10),
+                                    ElevatedButton(
+                                      onPressed: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => OrderForm(
+                                              menu: menu,
+                                              uidPedagang: widget.uidPedagang,
+                                              uidPembeli: widget.uidPembeli,
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                      child: Text('Pesan'),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
-                    isThreeLine: true,
-                    trailing: ElevatedButton(
-                      onPressed: () {
-                        _showOrderDialog(menu['nama_produk'], menu['harga']);
-                      },
-                      child: Text('Pesan'),
-                    ),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
-    );
-  }
-
-  void _showOrderDialog(String productName, String price) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Konfirmasi Pesanan'),
-          content: Text(
-              'Apakah Anda yakin ingin memesan $productName seharga $price?'),
-          actions: <Widget>[
-            TextButton(
-              child: Text('Batal'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: Text('Pesan'),
-              onPressed: () {
-                // Implement order logic here
-                Navigator.of(context).pop();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                      content:
-                          Text('Pesanan untuk $productName telah dilakukan.')),
-                );
-              },
-            ),
-          ],
-        );
-      },
     );
   }
 }

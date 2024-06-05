@@ -10,6 +10,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:gro_bak/helpers/gps.dart';
 import 'package:gro_bak/repository/getLongLat.dart';
 import 'package:gro_bak/view/list_menu_pembeli.dart';
+import 'package:gro_bak/view/list_pesanan.dart';
 import 'package:gro_bak/view/rute_pedagang.dart';
 
 import 'login.dart';
@@ -53,6 +54,20 @@ class _PembeliState extends State<Pembeli> {
           ),
         ),
         actions: [
+          IconButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => OrdersPage(),
+                ),
+              );
+            },
+            icon: Icon(
+              Icons.shopping_bag,
+              color: Color(0xFF060100),
+            ),
+          ),
           IconButton(
             onPressed: () {
               logout(context);
@@ -345,7 +360,7 @@ class _PembeliState extends State<Pembeli> {
                                             vertical:
                                                 4.0), // Add padding inside the child
                                         child: Text(
-                                          'Pesan',
+                                          'Menu',
                                           style: TextStyle(
                                             color: Color(0xFF060100),
                                             fontWeight: FontWeight.bold,

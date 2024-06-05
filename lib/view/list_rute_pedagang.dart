@@ -53,7 +53,23 @@ class _ListRutePageState extends State<ListRutePage> {
         centerTitle: true,
       ),
       body: ruteList.isEmpty
-          ? Center(child: CircularProgressIndicator())
+          ? Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "Tambahkan Rute ",
+                      style: TextStyle(
+                        fontSize: 30,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            )
           : ListView.builder(
               itemCount: ruteList.length,
               itemBuilder: (context, index) {

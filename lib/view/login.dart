@@ -133,33 +133,50 @@ class _LoginPageState extends State<LoginPage> {
 
   void route() async {
     User? user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      print('No user logged in.');
+      return;
+    }
+
     try {
       DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance
           .collection('users')
-          .doc(user!.uid)
+          .doc(user.uid)
           .get();
 
       if (documentSnapshot.exists) {
-        if (documentSnapshot.get('role') == "Pedagang") {
+        String role = documentSnapshot.get('role');
+        print('User role: $role');
+
+        if (role == "Pedagang") {
+          print('Navigating to BottomNavBar');
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
               builder: (context) => BottomNavBar(),
             ),
           );
-        } else {
+        } else if (role == "Pembeli") {
+          print('Navigating to Pembeli');
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
               builder: (context) => Pembeli(),
             ),
           );
+        } else {
+          print('Unknown role: $role');
+          _showErrorDialog('Unknown user role.');
+          setState(() {
+            _isSigning = false;
+          });
         }
       } else {
         print('Document does not exist on the database');
         setState(() {
           _isSigning = false;
         });
+        _showErrorDialog('User data not found.');
       }
     } catch (e) {
       print('Exception in route: $e');
@@ -178,6 +195,7 @@ class _LoginPageState extends State<LoginPage> {
           email: email,
           password: password,
         );
+        print('User signed in: ${userCredential.user?.uid}');
         route();
       } on FirebaseAuthException catch (e) {
         print('FirebaseAuthException code: ${e.code}');
