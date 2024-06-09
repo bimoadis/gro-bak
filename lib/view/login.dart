@@ -3,7 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:gro_bak/view/widget/bottom_bar.dart';
-import 'Pembeli.dart';
+import 'pembeli/Pembeli.dart';
 import 'register.dart';
 
 class LoginPage extends StatefulWidget {

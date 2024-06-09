@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:gro_bak/view/add_menu_pedagang.dart';
+import 'package:gro_bak/view/pedagang/add_menu_pedagang.dart';
 
 class ListMenuPage extends StatefulWidget {
   @override
@@ -40,7 +40,7 @@ class _ListMenuPageState extends State<ListMenuPage> {
   void _navigateToAddMenuPage() {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => MenuPedagang(),
+        builder: (context) => AddMenuPedagang(),
       ),
     );
   }
@@ -74,12 +74,43 @@ class _ListMenuPageState extends State<ListMenuPage> {
                 var menu = menuList[index];
                 return Card(
                   margin: EdgeInsets.all(8.0),
-                  child: ListTile(
-                    title: Text(menu['nama_produk'] ?? 'No Name'),
-                    subtitle: Text(
-                      'Deskripsi: ${menu['deskripsi_produk']}\nHarga: ${menu['harga']}',
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      children: [
+                        Row(
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(8.0),
+                              child: Image.asset(
+                                'assets/images/bakso.jpeg',
+                                width: 120,
+                                height: 90,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                            SizedBox(width: 10),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(menu['nama_produk'] ?? 'No Name'),
+                                  Text(
+                                    'Deskripsi: ${menu['deskripsi_produk']}',
+                                    style: TextStyle(color: Colors.grey[600]),
+                                  ),
+                                  Text(
+                                    'Harga: ${menu['harga']}',
+                                    style: TextStyle(color: Colors.grey[600]),
+                                  ),
+                                  SizedBox(height: 10),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
-                    isThreeLine: true,
                   ),
                 );
               },

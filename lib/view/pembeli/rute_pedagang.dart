@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
-import 'package:gro_bak/view/list_menu_pembeli.dart';
+import 'package:gro_bak/view/pembeli/list_menu_pembeli.dart';
 
 class RutePedagang extends StatefulWidget {
   final List<dynamic> seluruhRute;
@@ -216,6 +216,10 @@ class _RutePedagangState extends State<RutePedagang> {
         Marker marker = Marker(
           markerId: MarkerId(coordinate.toString()),
           position: coordinate,
+          infoWindow: InfoWindow(
+            title: route['address'],
+            snippet: 'Perkiraan: ${route['time']}',
+          ),
           icon: martIcon ??
               BitmapDescriptor.defaultMarkerWithHue(
                   BitmapDescriptor.hueBlue), // Gunakan ikon kustom

@@ -1,10 +1,10 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:gro_bak/view/Pembeli.dart';
+import 'package:gro_bak/view/pembeli/Pembeli.dart';
 import 'package:gro_bak/view/widget/bottom_bar.dart';
 import 'firebase_options.dart';
 import 'view/login.dart';
-import 'view/Pedagang.dart';
+import 'view/pedagang/Pedagang.dart';
 import 'package:flutter/material.dart';
 
 Future<void> main() async {
@@ -26,9 +26,9 @@ class _MyAppState extends State<MyApp> {
       theme: ThemeData(
         primaryColor: Colors.blue[900],
       ),
-      // home: LoginPage(),
+      home: LoginPage(),
       // home: Pembeli(),
-      home: BottomNavBar(),
+      // home: BottomNavBar(),
     );
   }
 }

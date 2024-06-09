@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:gro_bak/view/add_rute_pedagang.dart';
+import 'package:gro_bak/view/pedagang/add_rute_pedagang.dart';
 
 class ListRutePage extends StatefulWidget {
   @override

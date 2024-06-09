@@ -3,12 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:gro_bak/view/widget/bottom_bar.dart';
 
-class MenuPedagang extends StatefulWidget {
+class AddMenuPedagang extends StatefulWidget {
   @override
-  State<MenuPedagang> createState() => _MenuPedagangState();
+  State<AddMenuPedagang> createState() => _MenuPedagangState();
 }
 
-class _MenuPedagangState extends State<MenuPedagang> {
+class _MenuPedagangState extends State<AddMenuPedagang> {
   final _auth = FirebaseAuth.instance;
 
   final TextEditingController _namaProductController = TextEditingController();

@@ -9,11 +9,11 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:gro_bak/helpers/gps.dart';
 import 'package:gro_bak/repository/getLongLat.dart';
-import 'package:gro_bak/view/list_menu_pembeli.dart';
-import 'package:gro_bak/view/list_pesanan.dart';
-import 'package:gro_bak/view/rute_pedagang.dart';
+import 'package:gro_bak/view/pembeli/list_menu_pembeli.dart';
+import 'package:gro_bak/view/pembeli/list_pesanan.dart';
+import 'package:gro_bak/view/pembeli/rute_pedagang.dart';
 
-import 'login.dart';
+import '../login.dart';
 
 class Pembeli extends StatefulWidget {
   const Pembeli({Key? key}) : super(key: key);
