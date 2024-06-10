@@ -3,7 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:gro_bak/helpers/gps.dart';
+import 'package:gro_bak/services/gps.dart';
+import 'package:gro_bak/services/logout.dart';
 import 'package:gro_bak/repository/getOrders.dart';
 import 'package:gro_bak/view/widget/bottom_bar.dart';
 import 'package:gro_bak/view/login.dart';
@@ -81,7 +82,7 @@ class _PedagangState extends State<Pedagang> {
           actions: [
             IconButton(
               onPressed: () {
-                logout(context);
+                AuthService.logout(context);
               },
               icon: Icon(
                 Icons.logout,
@@ -173,16 +174,6 @@ class _PedagangState extends State<Pedagang> {
     setState(() {
       _selectedIndex = index;
     });
-  }
-
-  Future<void> logout(BuildContext context) async {
-    await FirebaseAuth.instance.signOut();
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => LoginPage(),
-      ),
-    );
   }
 
   Future<void> postDetailsToFirestore(double latitude, double longitude) async {

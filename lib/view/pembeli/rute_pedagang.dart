@@ -285,8 +285,8 @@ class _RutePedagangState extends State<RutePedagang> {
       flex: 1,
       child: ClipRRect(
         borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(34.0), // Set top-left corner radius
-          topRight: Radius.circular(34.0), // Set top-right corner radius
+          topLeft: Radius.circular(34.0),
+          topRight: Radius.circular(34.0),
         ),
         child: Container(
           color: Colors.white,

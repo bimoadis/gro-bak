@@ -1,5 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:gro_bak/services/messaging.dart';
 import 'package:gro_bak/view/pembeli/Pembeli.dart';
 import 'package:gro_bak/view/widget/bottom_bar.dart';
 import 'firebase_options.dart';
@@ -10,6 +11,7 @@ import 'package:flutter/material.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await MessageNotifications().initNotification();
   runApp(MyApp());
 }
 

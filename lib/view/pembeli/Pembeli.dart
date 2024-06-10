@@ -3,15 +3,17 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:gro_bak/helpers/gps.dart';
+import 'package:gro_bak/services/gps.dart';
+import 'package:gro_bak/services/logout.dart';
 import 'package:gro_bak/repository/getLongLat.dart';
 import 'package:gro_bak/view/pembeli/list_menu_pembeli.dart';
 import 'package:gro_bak/view/pembeli/list_pesanan.dart';
-import 'package:gro_bak/view/pembeli/rute_pedagang.dart';
+import 'package:gro_bak/view/widget/bottom_sheet.dart';
 
 import '../login.dart';
 
@@ -29,6 +31,7 @@ class _PembeliState extends State<Pembeli> {
   Exception? _exception;
   Timer? _timer;
   BitmapDescriptor sourceIcon = BitmapDescriptor.defaultMarker;
+  FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
 
   Completer<GoogleMapController> _controller = Completer();
   Future<List<Map<String, dynamic>>>? _combinedDataFuture;
@@ -70,7 +73,7 @@ class _PembeliState extends State<Pembeli> {
           ),
           IconButton(
             onPressed: () {
-              logout(context);
+              AuthService.logout(context);
             },
             icon: Icon(
               Icons.logout,
@@ -97,25 +100,74 @@ class _PembeliState extends State<Pembeli> {
     );
   }
 
-  Future<void> logout(BuildContext context) async {
-    CircularProgressIndicator();
-    await FirebaseAuth.instance.signOut();
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => LoginPage(),
-      ),
-    );
-  }
-
   @override
   void initState() {
     super.initState();
     _gps.startPositionStream(_handlePositionStream);
     setCustomMarkerIcon();
     _addMarkersFromFirestore();
+    _setupFirebaseMessaging();
 
     // _startPeriodicDataLoad();
+  }
+
+  void _setupFirebaseMessaging() {
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      RemoteNotification? notification = message.notification;
+      AndroidNotification? android = message.notification?.android;
+      if (notification != null && android != null) {
+        showDialog(
+          context: context,
+          builder: (_) => AlertDialog(
+            title: Text(notification.title ?? 'No Title'),
+            content: Text(notification.body ?? 'No Body'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text('OK'),
+              ),
+            ],
+          ),
+        );
+      }
+    });
+
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      print('A new onMessageOpenedApp event was published!');
+      // Handle the notification opening event here
+    });
+
+    _firebaseMessaging.subscribeToTopic("merchant_nearby");
+  }
+
+  void _startPeriodicLocationCheck() {
+    _timer = Timer.periodic(Duration(seconds: 10), (timer) async {
+      if (_userPosition != null) {
+        await _checkNearbyMerchants();
+      }
+    });
+  }
+
+  Future<void> _checkNearbyMerchants() async {
+    List<Map<String, dynamic>> merchants = await readMerchantData();
+    for (var merchant in merchants) {
+      if (merchant['latitude'] != '' && merchant['longitude'] != '') {
+        double distance = Geolocator.distanceBetween(
+          _userPosition!.latitude,
+          _userPosition!.longitude,
+          merchant['latitude'],
+          merchant['longitude'],
+        );
+        if (distance <= 100) {
+          _sendNotification(merchant['nama_usaha'], merchant['nama']);
+        }
+      }
+    }
+  }
+
+  void _sendNotification(String title, String body) {
+    // Logic to send a notification to the topic "merchant_nearby" should be implemented on the server side.
+    // Here we are just subscribing to the topic and handling incoming notifications.
   }
 
   void _startPeriodicDataLoad() {
@@ -214,173 +266,15 @@ class _PembeliState extends State<Pembeli> {
       context: context,
       isScrollControlled: true,
       builder: (BuildContext context) {
-        return SingleChildScrollView(
-          child: Container(
-            padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).viewInsets.bottom,
-            ),
-            child: Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: Text(
-                      'Detail Pedagang',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  Row(
-                    children: [
-                      Card(
-                        child: Container(
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(8.0),
-                            child: Image.asset(
-                              'assets/images/bakso.jpeg',
-                              width: 120,
-                              height: 90,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.only(left: 10),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              SizedBox(
-                                height: 10,
-                              ),
-                              SizedBox(
-                                height: 8,
-                              ),
-                              Text(
-                                nameMerchant,
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 20,
-                                ),
-                              ),
-                              Text(
-                                name,
-                                style: TextStyle(
-                                  fontSize: 14,
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 8.0, vertical: 4.0),
-                                child: Row(
-                                  children: [
-                                    TextButton(
-                                      onPressed: () {
-                                        Navigator.pushReplacement(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) => RutePedagang(
-                                              seluruhRute: seluruhRute,
-                                              namaPemilik: name,
-                                              namaUsaha: nameMerchant,
-                                              uidPedagang: uidPedagang,
-                                              uidPembeli: uidPembeli,
-                                              menu: menu,
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                      style: TextButton.styleFrom(
-                                        backgroundColor: Color(0xFFFEC901),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(16.0),
-                                        ),
-                                        padding: EdgeInsets
-                                            .zero, // Removing all padding
-                                        minimumSize:
-                                            Size(50, 30), // Set a minimum size
-                                        tapTargetSize: MaterialTapTargetSize
-                                            .shrinkWrap, // Shrink wrap the tap target size
-                                      ),
-                                      child: Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 18.0,
-                                            vertical:
-                                                4.0), // Add padding inside the child
-                                        child: Text(
-                                          'Rute',
-                                          style: TextStyle(
-                                            color: Color(0xFF060100),
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    SizedBox(
-                                      width: 10,
-                                    ),
-                                    TextButton(
-                                      onPressed: () {
-                                        Navigator.pushReplacement(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) =>
-                                                ListMenuPesanan(
-                                              menu: menu,
-                                              uidPedagang: uidPedagang,
-                                              uidPembeli: uidPembeli,
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                      style: TextButton.styleFrom(
-                                        backgroundColor: Color(0xFFFEC901),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(16.0),
-                                        ),
-                                        padding: EdgeInsets
-                                            .zero, // Removing all padding
-                                        minimumSize:
-                                            Size(50, 30), // Set a minimum size
-                                        tapTargetSize: MaterialTapTargetSize
-                                            .shrinkWrap, // Shrink wrap the tap target size
-                                      ),
-                                      child: Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 18.0,
-                                            vertical:
-                                                4.0), // Add padding inside the child
-                                        child: Text(
-                                          'Menu',
-                                          style: TextStyle(
-                                            color: Color(0xFF060100),
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
+        return BottomSheetWidget(
+          nameMerchant: nameMerchant,
+          name: name,
+          seluruhRute: seluruhRute,
+          menu: menu,
+          latitude: latitude,
+          longitude: longitude,
+          uidPedagang: uidPedagang,
+          uidPembeli: uidPembeli,
         );
       },
     );
