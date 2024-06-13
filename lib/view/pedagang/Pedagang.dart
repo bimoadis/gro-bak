@@ -36,6 +36,7 @@ class _PedagangState extends State<Pedagang> {
   void initState() {
     super.initState();
     _gps.startPositionStream(_handlePositionStream);
+
     _ordersSubscription = _firestoreService.getOrders().listen((orders) {
       setState(() {
         _menungguKonfirmasiOrders = orders
@@ -50,6 +51,7 @@ class _PedagangState extends State<Pedagang> {
             .toList();
       });
     });
+    startTimer();
   }
 
   @override

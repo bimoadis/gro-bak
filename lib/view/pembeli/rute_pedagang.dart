@@ -48,7 +48,7 @@ class _RutePedagangState extends State<RutePedagang> {
     _loadMerchantData();
 
     _addMarkers(widget.seluruhRute);
-    // _startPeriodicDataLoad();
+    _startPeriodicDataLoad();
   }
 
   @override

@@ -3,18 +3,18 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:gro_bak/repository/getLongLat.dart';
+import 'package:gro_bak/services/fcm_message.dart';
 import 'package:gro_bak/services/gps.dart';
 import 'package:gro_bak/services/logout.dart';
-import 'package:gro_bak/repository/getLongLat.dart';
 import 'package:gro_bak/view/pembeli/list_menu_pembeli.dart';
 import 'package:gro_bak/view/pembeli/list_pesanan.dart';
+import 'package:gro_bak/view/pembeli/rute_pedagang.dart';
 import 'package:gro_bak/view/widget/bottom_sheet.dart';
-
 import '../login.dart';
 
 class Pembeli extends StatefulWidget {
@@ -26,12 +26,15 @@ class Pembeli extends StatefulWidget {
 
 class _PembeliState extends State<Pembeli> {
   final user = FirebaseAuth.instance.currentUser;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
   final GPS _gps = GPS();
   Position? _userPosition;
   Exception? _exception;
   Timer? _timer;
   BitmapDescriptor sourceIcon = BitmapDescriptor.defaultMarker;
-  FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
+  // Position? _currentPosition;
+  // User? _currentUser;
+  final MessageNotifications _messageNotifications = MessageNotifications();
 
   Completer<GoogleMapController> _controller = Completer();
   Future<List<Map<String, dynamic>>>? _combinedDataFuture;
@@ -106,73 +109,32 @@ class _PembeliState extends State<Pembeli> {
     _gps.startPositionStream(_handlePositionStream);
     setCustomMarkerIcon();
     _addMarkersFromFirestore();
-    _setupFirebaseMessaging();
+    _messageNotifications.initNotification();
+    _getCurrentLocation();
+    _startPeriodicNotification();
 
-    // _startPeriodicDataLoad();
+    _startPeriodicDataLoad();
   }
 
-  void _setupFirebaseMessaging() {
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      RemoteNotification? notification = message.notification;
-      AndroidNotification? android = message.notification?.android;
-      if (notification != null && android != null) {
-        showDialog(
-          context: context,
-          builder: (_) => AlertDialog(
-            title: Text(notification.title ?? 'No Title'),
-            content: Text(notification.body ?? 'No Body'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: Text('OK'),
-              ),
-            ],
-          ),
-        );
-      }
-    });
-
-    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      print('A new onMessageOpenedApp event was published!');
-      // Handle the notification opening event here
-    });
-
-    _firebaseMessaging.subscribeToTopic("merchant_nearby");
-  }
-
-  void _startPeriodicLocationCheck() {
-    _timer = Timer.periodic(Duration(seconds: 10), (timer) async {
-      if (_userPosition != null) {
-        await _checkNearbyMerchants();
-      }
-    });
-  }
-
-  Future<void> _checkNearbyMerchants() async {
-    List<Map<String, dynamic>> merchants = await readMerchantData();
-    for (var merchant in merchants) {
-      if (merchant['latitude'] != '' && merchant['longitude'] != '') {
-        double distance = Geolocator.distanceBetween(
-          _userPosition!.latitude,
-          _userPosition!.longitude,
-          merchant['latitude'],
-          merchant['longitude'],
-        );
-        if (distance <= 100) {
-          _sendNotification(merchant['nama_usaha'], merchant['nama']);
-        }
-      }
-    }
-  }
-
-  void _sendNotification(String title, String body) {
-    // Logic to send a notification to the topic "merchant_nearby" should be implemented on the server side.
-    // Here we are just subscribing to the topic and handling incoming notifications.
+  void _startSendingNotifications(String vendorName) {
+    // _timer = Timer.periodic(Duration(seconds: 10), (timer) {
+    _messageNotifications.sendFCMMessage(vendorName);
+    print(' haloo ini bnjdbfenfceb');
+    // });
   }
 
   void _startPeriodicDataLoad() {
     _timer = Timer.periodic(Duration(seconds: 10), (timer) {
       _addMarkersFromFirestore();
+      print('update data pedagng');
+    });
+  }
+
+  void _startPeriodicNotification() {
+    _timer = Timer.periodic(Duration(seconds: 10), (timer) async {
+      await _getCurrentLocation();
+      await _checkNearbyVendors();
+      print('Checking nearby vendors...');
     });
   }
 
@@ -297,6 +259,50 @@ class _PembeliState extends State<Pembeli> {
       setState(() {
         sourceIcon = BitmapDescriptor.fromBytes(resizedBytes);
       });
+    }
+  }
+
+  Future<void> _getCurrentLocation() async {
+    try {
+      Position position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.best);
+      setState(() {
+        _userPosition = position;
+      });
+    } catch (e) {
+      print('Error: ${e.toString()}');
+    }
+  }
+
+  Future<void> _checkNearbyVendors() async {
+    if (_userPosition == null) return;
+
+    final double thresholdDistance = 100.0;
+
+    // Get the current user
+
+    try {
+      List<Map<String, dynamic>> merchantData = await readMerchantData();
+
+      for (var merchant in merchantData) {
+        double vendorLatitude = merchant['latitude'];
+        double vendorLongitude = merchant['longitude'];
+        String vendorName = merchant['nama_usaha'];
+
+        double distance = Geolocator.distanceBetween(
+          _userPosition!.latitude,
+          _userPosition!.longitude,
+          vendorLatitude,
+          vendorLongitude,
+        );
+
+        if (distance <= thresholdDistance) {
+          _startSendingNotifications(vendorName);
+          break; // Send notification for the first nearby vendor found
+        }
+      }
+    } catch (e) {
+      print('Error checking nearby vendors: $e');
     }
   }
 }

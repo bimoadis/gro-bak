@@ -1,17 +1,28 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:gro_bak/services/messaging.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:gro_bak/firebase_options.dart';
+import 'package:gro_bak/services/fcm_message.dart';
+import 'package:gro_bak/view/test_message.dart';
 import 'package:gro_bak/view/pembeli/Pembeli.dart';
+import 'package:gro_bak/view/test_message_loc.dart';
 import 'package:gro_bak/view/widget/bottom_bar.dart';
 import 'firebase_options.dart';
 import 'view/login.dart';
 import 'view/pedagang/Pedagang.dart';
 import 'package:flutter/material.dart';
 
-Future<void> main() async {
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+  print("Handling a background message: ${message.messageId}");
+}
+
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await MessageNotifications().initNotification();
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
   runApp(MyApp());
 }
 
@@ -31,6 +42,8 @@ class _MyAppState extends State<MyApp> {
       home: LoginPage(),
       // home: Pembeli(),
       // home: BottomNavBar(),
+      // home: HomePage(),
+      // home: LocationNotificationScreen(),
     );
   }
 }
