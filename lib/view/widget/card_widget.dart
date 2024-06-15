@@ -92,18 +92,32 @@ class CardHistory extends StatelessWidget {
                   ),
                 ],
               ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    status,
-                    style: TextStyle(
-                      color: Colors.green[500],
-                      fontWeight: FontWeight.bold,
+              if (status == 'Menunggu Konfirmasi')
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      status,
+                      style: TextStyle(
+                        color: Colors.green[500],
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                ],
-              ),
+                  ],
+                ),
+              if (status == 'Dikonfirmasi')
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      status,
+                      style: TextStyle(
+                        color: Colors.green[500],
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
             ],
           ),
         ],

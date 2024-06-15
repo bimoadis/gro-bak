@@ -87,7 +87,7 @@ class _PembeliState extends State<Pembeli> {
       ),
       body: GoogleMap(
         initialCameraPosition: CameraPosition(
-          target: LatLng(-7.27562362979344, 112.79377717822462),
+          target: LatLng(-7.767871671923604, 112.19628241044954),
           zoom: 15,
         ),
         markers: Set<Marker>.from(_markers),
@@ -124,14 +124,14 @@ class _PembeliState extends State<Pembeli> {
   }
 
   void _startPeriodicDataLoad() {
-    _timer = Timer.periodic(Duration(seconds: 10), (timer) {
+    _timer = Timer.periodic(Duration(seconds: 20), (timer) {
       _addMarkersFromFirestore();
       print('update data pedagng');
     });
   }
 
   void _startPeriodicNotification() {
-    _timer = Timer.periodic(Duration(seconds: 10), (timer) async {
+    _timer = Timer.periodic(Duration(seconds: 20), (timer) async {
       await _getCurrentLocation();
       await _checkNearbyVendors();
       print('Checking nearby vendors...');

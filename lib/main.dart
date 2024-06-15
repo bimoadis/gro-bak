@@ -10,6 +10,7 @@ import 'package:gro_bak/view/widget/bottom_bar.dart';
 import 'firebase_options.dart';
 import 'view/login.dart';
 import 'view/pedagang/Pedagang.dart';
+import 'package:gro_bak/services/gps.dart';
 import 'package:flutter/material.dart';
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -21,6 +22,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await MessageNotifications().initNotification();
+  await GPS();
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
   runApp(MyApp());

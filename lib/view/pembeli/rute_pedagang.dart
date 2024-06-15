@@ -58,8 +58,9 @@ class _RutePedagangState extends State<RutePedagang> {
   }
 
   void _startPeriodicDataLoad() {
-    _timer = Timer.periodic(Duration(seconds: 10), (timer) {
+    _timer = Timer.periodic(Duration(seconds: 20), (timer) {
       _loadMerchantData();
+      print('ini dari rute pedagang');
     });
   }
 

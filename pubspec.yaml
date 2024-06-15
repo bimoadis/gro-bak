@@ -55,6 +55,7 @@ dependencies:
   googleapis_auth: ^1.5.1
   firebase_analytics: ^10.2.0
   flutter_background_service: ^5.0.5
+  rename: ^3.0.2
 
 
   
