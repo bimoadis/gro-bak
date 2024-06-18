@@ -7,7 +7,7 @@ import 'package:gro_bak/view/test_message.dart';
 import 'package:gro_bak/view/pembeli/Pembeli.dart';
 import 'package:gro_bak/view/test_message_loc.dart';
 import 'package:gro_bak/view/widget/bottom_bar.dart';
-import 'firebase_options.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'view/login.dart';
 import 'view/pedagang/Pedagang.dart';
 import 'package:gro_bak/services/gps.dart';
@@ -24,11 +24,19 @@ void main() async {
   await MessageNotifications().initNotification();
   await GPS();
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+  String? userRole = prefs.getString('userRole');
 
-  runApp(MyApp());
+  runApp(MyApp(isLoggedIn: isLoggedIn, userRole: userRole));
 }
 
 class MyApp extends StatefulWidget {
+  final bool isLoggedIn;
+  final String? userRole;
+
+  MyApp({required this.isLoggedIn, this.userRole});
+
   @override
   _MyAppState createState() => _MyAppState();
 }
@@ -36,16 +44,25 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
+    Widget home;
+    if (widget.isLoggedIn) {
+      if (widget.userRole == "Pedagang") {
+        home = BottomNavBar();
+      } else if (widget.userRole == "Pembeli") {
+        home = Pembeli();
+      } else {
+        home = LoginPage(); // Fallback if userRole is unknown
+      }
+    } else {
+      home = LoginPage();
+    }
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primaryColor: Colors.blue[900],
       ),
-      home: LoginPage(),
-      // home: Pembeli(),
-      // home: BottomNavBar(),
-      // home: HomePage(),
-      // home: LocationNotificationScreen(),
+      home: home,
     );
   }
 }

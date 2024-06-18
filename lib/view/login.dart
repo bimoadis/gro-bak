@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:gro_bak/view/test_message_loc.dart';
 import 'package:gro_bak/view/widget/bottom_bar.dart';
 import 'package:gro_bak/view/widget/form_widget.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'pembeli/Pembeli.dart';
 import 'register.dart';
 
@@ -260,6 +261,9 @@ class _LoginPageState extends State<LoginPage> {
         String role = documentSnapshot.get('role');
         print('User role: $role');
 
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString('userRole', role);
+
         if (role == "Pedagang") {
           print('Navigating to BottomNavBar');
           Navigator.pushReplacement(
@@ -278,7 +282,6 @@ class _LoginPageState extends State<LoginPage> {
           );
         } else {
           print('Unknown role: $role');
-          // _showErrorDialog('Unknown user role.');
           setState(() {
             _isSigning = false;
           });
@@ -288,14 +291,12 @@ class _LoginPageState extends State<LoginPage> {
         setState(() {
           _isSigning = false;
         });
-        // _showErrorDialog('User data not found.');
       }
     } catch (e) {
       print('Exception in route: $e');
       setState(() {
         _isSigning = false;
       });
-      // _showErrorDialog('Failed to fetch user data. Please try again.');
     }
   }
 
@@ -312,6 +313,12 @@ class _LoginPageState extends State<LoginPage> {
         email: email,
         password: password,
       );
+
+      // Simpan status login
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('isLoggedIn', true);
+      await prefs.setString('userRole', userCredential.user!.uid);
+
       route();
     } on FirebaseAuthException catch (e) {
       setState(() {
@@ -335,22 +342,4 @@ class _LoginPageState extends State<LoginPage> {
       print('Exception: $e');
     }
   }
-
-  // void _showErrorDialog(String? message) {
-  //   showDialog(
-  //     context: context,
-  //     builder: (ctx) => AlertDialog(
-  //       title: Text('Error'),
-  //       content: Text(message ?? 'An unknown error occurred'),
-  //       actions: <Widget>[
-  //         TextButton(
-  //           child: Text('Okay'),
-  //           onPressed: () {
-  //             Navigator.of(ctx).pop();
-  //           },
-  //         )
-  //       ],
-  //     ),
-  //   );
-  // }
 }
