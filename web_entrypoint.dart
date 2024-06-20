@@ -63,7 +63,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Home Page"),
+        title: const Text("Home Page"),
         automaticallyImplyLeading: false,
         centerTitle: true,
         titleTextStyle: TextStyle(
@@ -73,7 +73,7 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
       body: Container(
-        margin: EdgeInsets.only(left: 160),
+        margin: const EdgeInsets.only(left: 160),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -84,8 +84,8 @@ class _HomePageState extends State<HomePage> {
               },
               style: ButtonStyle(
                 backgroundColor:
-                    MaterialStateProperty.all(Colors.lightBlue[100]),
-                foregroundColor: MaterialStatePropertyAll(Colors.white),
+                    WidgetStateProperty.all(Colors.lightBlue[100]),
+                foregroundColor: const WidgetStatePropertyAll(Colors.white),
               ),
               child: const Text("Send"),
             ),
@@ -95,8 +95,8 @@ class _HomePageState extends State<HomePage> {
               },
               style: ButtonStyle(
                 backgroundColor:
-                    MaterialStateProperty.all(Colors.lightBlue[100]),
-                foregroundColor: MaterialStatePropertyAll(Colors.white),
+                    WidgetStateProperty.all(Colors.lightBlue[100]),
+                foregroundColor: const WidgetStatePropertyAll(Colors.white),
               ),
               child: const Text("Log Out"),
             ),

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 class OrderForm extends StatefulWidget {
   final Map<String, dynamic> menu;
@@ -8,11 +7,11 @@ class OrderForm extends StatefulWidget {
   final String uidPembeli;
 
   const OrderForm({
-    Key? key,
+    super.key,
     required this.menu,
     required this.uidPedagang,
     required this.uidPembeli,
-  }) : super(key: key);
+  });
 
   @override
   _OrderFormState createState() => _OrderFormState();

@@ -9,11 +9,11 @@ class ListMenuPesanan extends StatefulWidget {
   final String uidPembeli;
 
   const ListMenuPesanan({
-    Key? key,
+    super.key,
     required this.menu,
     required this.uidPedagang,
     required this.uidPembeli,
-  }) : super(key: key);
+  });
 
   @override
   _ListMenuPesananState createState() => _ListMenuPesananState();
@@ -35,11 +35,11 @@ class _ListMenuPesananState extends State<ListMenuPesanan> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('List Menu'),
+        title: const Text('List Menu'),
         centerTitle: true,
       ),
       body: menuList.isEmpty
-          ? Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator())
           : Padding(
               padding: const EdgeInsets.all(16.0),
               child: ListView.builder(
@@ -52,7 +52,7 @@ class _ListMenuPesananState extends State<ListMenuPesanan> {
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(8.0),
-                      boxShadow: [
+                      boxShadow: const [
                         BoxShadow(
                           color: Colors.black26,
                           blurRadius: 6.0,
@@ -75,19 +75,19 @@ class _ListMenuPesananState extends State<ListMenuPesanan> {
                                   fit: BoxFit.cover,
                                 ),
                               ),
-                              SizedBox(width: 10),
+                              const SizedBox(width: 10),
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  SizedBox(height: 4.0),
+                                  const SizedBox(height: 4.0),
                                   Text(
                                     menu['nama_produk'] ?? 'No Name',
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       fontSize: 18.0,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
-                                  SizedBox(height: 4.0),
+                                  const SizedBox(height: 4.0),
                                   // Text(
                                   //   'Deskripsi: ${menu['deskripsi_produk']}',
                                   //   style: TextStyle(color: Colors.grey[600]),
@@ -96,7 +96,7 @@ class _ListMenuPesananState extends State<ListMenuPesanan> {
                                     'Harga: ${menu['harga']}',
                                     style: TextStyle(color: Colors.grey[600]),
                                   ),
-                                  SizedBox(height: 10),
+                                  const SizedBox(height: 10),
                                   ElevatedButton(
                                     onPressed: () {
                                       Navigator.push(
@@ -110,7 +110,7 @@ class _ListMenuPesananState extends State<ListMenuPesanan> {
                                         ),
                                       );
                                     },
-                                    child: Text('Pesan'),
+                                    child: const Text('Pesan'),
                                   ),
                                 ],
                               ),

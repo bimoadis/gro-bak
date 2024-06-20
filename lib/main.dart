@@ -3,15 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:gro_bak/firebase_options.dart';
 import 'package:gro_bak/services/fcm_message.dart';
-import 'package:gro_bak/view/test_message.dart';
-import 'package:gro_bak/view/pembeli/Pembeli.dart';
-import 'package:gro_bak/view/test_message_loc.dart';
+import 'package:gro_bak/view/pembeli/pages/Pembeli.dart';
+import 'package:gro_bak/view/pembeli/pages/page_switcher.dart';
 import 'package:gro_bak/view/widget/bottom_bar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'view/login.dart';
-import 'view/pedagang/Pedagang.dart';
 import 'package:gro_bak/services/gps.dart';
-import 'package:flutter/material.dart';
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
@@ -35,7 +32,7 @@ class MyApp extends StatefulWidget {
   final bool isLoggedIn;
   final String? userRole;
 
-  MyApp({required this.isLoggedIn, this.userRole});
+  const MyApp({required this.isLoggedIn, this.userRole});
 
   @override
   _MyAppState createState() => _MyAppState();
@@ -49,7 +46,7 @@ class _MyAppState extends State<MyApp> {
       if (widget.userRole == "Pedagang") {
         home = BottomNavBar();
       } else if (widget.userRole == "Pembeli") {
-        home = Pembeli();
+        home = const PageSwitcherPembeli();
       } else {
         home = LoginPage(); // Fallback if userRole is unknown
       }

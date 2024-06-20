@@ -118,7 +118,7 @@ class _RutePedagangState extends State<RutePedagang> {
   void _updateInitialMarker(double latitude, double longitude) {
     LatLng newPosition = LatLng(latitude, longitude);
     Marker marker = Marker(
-      markerId: MarkerId('initial_position'),
+      markerId: const MarkerId('initial_position'),
       position: newPosition,
       icon: shoppingCartIcon ??
           BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),

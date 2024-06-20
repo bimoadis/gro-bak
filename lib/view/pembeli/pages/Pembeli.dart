@@ -1,24 +1,20 @@
 import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:gro_bak/repository/getLongLat.dart';
 import 'package:gro_bak/services/fcm_message.dart';
 import 'package:gro_bak/services/gps.dart';
-import 'package:gro_bak/services/logout.dart';
-import 'package:gro_bak/view/pembeli/list_menu_pembeli.dart';
-import 'package:gro_bak/view/pembeli/list_pesanan.dart';
-import 'package:gro_bak/view/pembeli/rute_pedagang.dart';
 import 'package:gro_bak/view/widget/bottom_sheet.dart';
-import '../login.dart';
+import 'package:widget_to_marker/widget_to_marker.dart';
 
 class Pembeli extends StatefulWidget {
-  const Pembeli({Key? key}) : super(key: key);
+  const Pembeli({super.key});
 
   @override
   State<Pembeli> createState() => _PembeliState();
@@ -26,82 +22,17 @@ class Pembeli extends StatefulWidget {
 
 class _PembeliState extends State<Pembeli> {
   final user = FirebaseAuth.instance.currentUser;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
   final GPS _gps = GPS();
   Position? _userPosition;
-  Exception? _exception;
   Timer? _timer;
   BitmapDescriptor sourceIcon = BitmapDescriptor.defaultMarker;
-  // Position? _currentPosition;
-  // User? _currentUser;
   final MessageNotifications _messageNotifications = MessageNotifications();
 
-  Completer<GoogleMapController> _controller = Completer();
+  final Completer<GoogleMapController> _controller = Completer();
   Future<List<Map<String, dynamic>>>? _combinedDataFuture;
-  Set<Marker> _markers = Set<Marker>();
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          "Gro-bak",
-          style: TextStyle(
-            fontSize: 32,
-            color: Color(0xFFFEC901),
-            fontWeight: FontWeight.bold,
-            shadows: [
-              const Shadow(
-                offset: Offset(1.0, 1.0), // position of the shadow
-                blurRadius: 1.0, // blur effect
-                color: Color(0xFF060100), // semi-transparent black color
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          IconButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => OrdersPage(),
-                ),
-              );
-            },
-            icon: Icon(
-              Icons.shopping_bag,
-              color: Color(0xFF060100),
-            ),
-          ),
-          IconButton(
-            onPressed: () {
-              AuthService.logout(context);
-            },
-            icon: Icon(
-              Icons.logout,
-              color: Color(0xFF060100),
-            ),
-          )
-        ],
-      ),
-      body: GoogleMap(
-        initialCameraPosition: CameraPosition(
-          target: LatLng(-7.767871671923604, 112.19628241044954),
-          zoom: 15,
-        ),
-        markers: Set<Marker>.from(_markers),
-        onMapCreated: (GoogleMapController controller) {
-          _controller.complete(controller);
-        },
-        myLocationEnabled: true,
-        zoomControlsEnabled: false,
-        compassEnabled: false,
-        myLocationButtonEnabled: false,
-        mapToolbarEnabled: false,
-      ),
-    );
-  }
+  Set<Marker> _markers = <Marker>{};
+  String? _currentAddress;
+  Position? _currentPosition;
 
   @override
   void initState() {
@@ -112,8 +43,40 @@ class _PembeliState extends State<Pembeli> {
     _messageNotifications.initNotification();
     _getCurrentLocation();
     _startPeriodicNotification();
-
     _startPeriodicDataLoad();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      // Agar initial positionnya berada di posisi user
+      body: FutureBuilder(
+          future: _getCurrentLocation(),
+          builder: (context, snapshot) {
+            if (_userPosition != null) {
+              return GoogleMap(
+                initialCameraPosition: CameraPosition(
+                  target:
+                      LatLng(_userPosition!.latitude, _userPosition!.longitude),
+                  zoom: 15,
+                ),
+                markers: Set<Marker>.from(_markers),
+                onMapCreated: (GoogleMapController controller) {
+                  _controller.complete(controller);
+                },
+                myLocationEnabled: true,
+                zoomControlsEnabled: false,
+                compassEnabled: true,
+                myLocationButtonEnabled: true,
+                mapToolbarEnabled: false,
+              );
+            } else {
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            }
+          }),
+    );
   }
 
   void _startSendingNotifications(String vendorName) {
@@ -124,14 +87,14 @@ class _PembeliState extends State<Pembeli> {
   }
 
   void _startPeriodicDataLoad() {
-    _timer = Timer.periodic(Duration(seconds: 20), (timer) {
+    _timer = Timer.periodic(const Duration(seconds: 20), (timer) {
       _addMarkersFromFirestore();
       print('update data pedagng');
     });
   }
 
   void _startPeriodicNotification() {
-    _timer = Timer.periodic(Duration(seconds: 20), (timer) async {
+    _timer = Timer.periodic(const Duration(seconds: 20), (timer) async {
       await _getCurrentLocation();
       await _checkNearbyVendors();
       print('Checking nearby vendors...');
@@ -180,16 +143,23 @@ class _PembeliState extends State<Pembeli> {
       _combinedDataFuture = readMerchantData();
     });
 
-    _combinedDataFuture!.then((combinedData) {
-      Set<Marker> markers = Set<Marker>();
+    _combinedDataFuture!.then((combinedData) async {
+      Set<Marker> markers = <Marker>{};
       for (var data in combinedData) {
         if (data['latitude'] != '' && data['longitude'] != '') {
           try {
             LatLng position = LatLng(data['latitude'], data['longitude']);
             markers.add(
               Marker(
+                infoWindow: InfoWindow(
+                  title: data['nama_usaha'],
+                  snippet: data['nama'],
+                ),
                 markerId: MarkerId(data['email']),
-                icon: sourceIcon, // Use the custom icon here
+                // icon: sourceIcon, // Use the custom icon here
+                icon: await CustomMarker(data: data).toBitmapDescriptor(
+                    logicalSize: const Size(150, 50),
+                    imageSize: const Size(300, 100)),
                 position: position,
                 onTap: () {
                   _showBottomSheet(
@@ -304,5 +274,38 @@ class _PembeliState extends State<Pembeli> {
     } catch (e) {
       print('Error checking nearby vendors: $e');
     }
+  }
+}
+
+class CustomMarker extends StatelessWidget {
+  const CustomMarker({
+    super.key,
+    required this.data,
+  });
+
+  final Map<String, dynamic> data;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(
+          Icons.shopping_cart,
+          color: Colors.orange.shade800,
+        ),
+        const SizedBox(
+          width: 5,
+        ),
+        SizedBox(
+          width: 100,
+          child: Text(
+            '${data['nama_usaha']}',
+            maxLines: 2,
+            style: const TextStyle(
+                color: Colors.black, overflow: TextOverflow.ellipsis),
+          ),
+        )
+      ],
+    );
   }
 }

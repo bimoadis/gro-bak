@@ -16,11 +16,11 @@ class _RegisterState extends State<Register> {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   final _formKey = GlobalKey<FormState>();
 
-  TextEditingController _usernameController = TextEditingController();
-  TextEditingController _emailController = TextEditingController();
-  TextEditingController _passwordController = TextEditingController();
-  TextEditingController _namaUsahaController = TextEditingController();
-  TextEditingController _nomorTeleponController = TextEditingController();
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _namaUsahaController = TextEditingController();
+  final TextEditingController _nomorTeleponController = TextEditingController();
 
   bool isSigningUp = false;
   String _role = "Pembeli";
@@ -51,8 +51,8 @@ class _RegisterState extends State<Register> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  SizedBox(height: 105),
-                  Text(
+                  const SizedBox(height: 105),
+                  const Text(
                     'Daftar akun',
                     style: TextStyle(
                       fontSize: 42, // Equivalent to text-4xl in Tailwind CSS
@@ -60,9 +60,9 @@ class _RegisterState extends State<Register> {
                       color: Color(0xFF060100),
                     ),
                   ),
-                  SizedBox(height: 15),
+                  const SizedBox(height: 15),
                   RichText(
-                    text: TextSpan(
+                    text: const TextSpan(
                       children: [
                         TextSpan(
                           text: 'Silahkan daftar sesuai dengan ',
@@ -83,7 +83,7 @@ class _RegisterState extends State<Register> {
                       ],
                     ),
                   ),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -95,7 +95,7 @@ class _RegisterState extends State<Register> {
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor:
-                              _role == "Pembeli" ? Color(0xFFFEC901) : null,
+                              _role == "Pembeli" ? const Color(0xFFFEC901) : null,
                           elevation: 0,
                           shadowColor: Colors.transparent,
                         ),
@@ -103,12 +103,12 @@ class _RegisterState extends State<Register> {
                           "Pembeli",
                           style: TextStyle(
                             color: _role == "Pembeli"
-                                ? Color(0xFF060100)
+                                ? const Color(0xFF060100)
                                 : Colors.grey,
                           ),
                         ),
                       ),
-                      SizedBox(width: 20),
+                      const SizedBox(width: 20),
                       ElevatedButton(
                         onPressed: () {
                           setState(() {
@@ -117,7 +117,7 @@ class _RegisterState extends State<Register> {
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor:
-                              _role == "Pedagang" ? Color(0xFFFEC901) : null,
+                              _role == "Pedagang" ? const Color(0xFFFEC901) : null,
                           elevation: 0,
                           shadowColor: Colors.transparent,
                         ),
@@ -125,47 +125,47 @@ class _RegisterState extends State<Register> {
                           "Pedagang",
                           style: TextStyle(
                             color: _role == "Pedagang"
-                                ? Color(0xFF060100)
+                                ? const Color(0xFF060100)
                                 : Colors.grey,
                           ),
                         ),
                       ),
                     ],
                   ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   FormContainerWidget(
                     controller: _usernameController,
                     hintText: "Username",
                     isPasswordField: false,
                   ),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   FormContainerWidget(
                     controller: _emailController,
                     hintText: "Email",
                     isPasswordField: false,
                   ),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   FormContainerWidget(
                     controller: _passwordController,
                     hintText: "Password",
                     isPasswordField: true,
                   ),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   if (_role == "Pedagang") ...[
                     FormContainerWidget(
                       controller: _namaUsahaController,
                       hintText: "Nama Usaha",
                       isPasswordField: false,
                     ),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 10),
                     FormContainerWidget(
                       controller: _nomorTeleponController,
                       hintText: "Nomor Telepon",
                       isPasswordField: false,
                     ),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 10),
                   ],
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   GestureDetector(
                     onTap: () {
                       _signUp(
@@ -191,15 +191,15 @@ class _RegisterState extends State<Register> {
                       width: double.infinity,
                       height: 45,
                       decoration: BoxDecoration(
-                        color: Color(0xFFFEC901),
+                        color: const Color(0xFFFEC901),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Center(
                         child: isSigningUp
-                            ? CircularProgressIndicator(
+                            ? const CircularProgressIndicator(
                                 color: Colors.white,
                               )
-                            : Text(
+                            : const Text(
                                 "Sign Up",
                                 style: TextStyle(
                                     color: Color(0xFF060100),
@@ -208,12 +208,12 @@ class _RegisterState extends State<Register> {
                       ),
                     ),
                   ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text("Sudah memiliki akun?"),
-                      SizedBox(width: 5),
+                      const Text("Sudah memiliki akun?"),
+                      const SizedBox(width: 5),
                       GestureDetector(
                         onTap: () {
                           Navigator.pushAndRemoveUntil(
@@ -223,7 +223,7 @@ class _RegisterState extends State<Register> {
                             (route) => false,
                           );
                         },
-                        child: Text(
+                        child: const Text(
                           "Login",
                           style: TextStyle(
                             color: Color(0xFFFEC901), // Yellow color for text
@@ -242,7 +242,7 @@ class _RegisterState extends State<Register> {
                       ),
                     ],
                   ),
-                  SizedBox(height: 20),
+                 const SizedBox(height: 20),
                 ],
               ),
             ),

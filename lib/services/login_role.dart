@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:gro_bak/view/pembeli/Pembeli.dart';
+import 'package:gro_bak/view/pembeli/pages/Pembeli.dart';
 import 'package:gro_bak/view/widget/bottom_bar.dart';
 
 class LoginLogic {

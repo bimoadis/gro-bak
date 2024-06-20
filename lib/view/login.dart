@@ -2,11 +2,12 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:gro_bak/view/pembeli/pages/page_switcher.dart';
 import 'package:gro_bak/view/test_message_loc.dart';
 import 'package:gro_bak/view/widget/bottom_bar.dart';
 import 'package:gro_bak/view/widget/form_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'pembeli/Pembeli.dart';
+import 'pembeli/pages/Pembeli.dart';
 import 'register.dart';
 
 class LoginPage extends StatefulWidget {
@@ -77,11 +78,11 @@ class _LoginPageState extends State<LoginPage> {
                       //     color: Color(0xFF060100),
                       //   ),
                       // ),
-                      SizedBox(
+                      const SizedBox(
                         height: 8,
                       ), // Adding some space between the Text widgets
                       RichText(
-                        text: TextSpan(
+                        text: const TextSpan(
                           children: [
                             TextSpan(
                               text: 'Selamat datang di ',
@@ -106,7 +107,7 @@ class _LoginPageState extends State<LoginPage> {
                                     offset: Offset(
                                         1.0, 1.0), // position of the shadow
                                     blurRadius: 1.5, // blur effect
-                                    color: const Color.fromARGB(128, 0, 0,
+                                    color: Color.fromARGB(128, 0, 0,
                                         0), // semi-transparent black color
                                   ),
                                 ],
@@ -118,7 +119,7 @@ class _LoginPageState extends State<LoginPage> {
                       SizedBox(
                           height: MediaQuery.of(context).size.height *
                               0.02), // Adding some space before the paragraph
-                      Text(
+                      const Text(
                         'Silahkan masukkan email dan password akun anda',
                         style: TextStyle(
                           color: Colors
@@ -129,7 +130,7 @@ class _LoginPageState extends State<LoginPage> {
                     ],
                   ),
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -277,7 +278,7 @@ class _LoginPageState extends State<LoginPage> {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (context) => Pembeli(),
+              builder: (context) => const PageSwitcherPembeli(),
             ),
           );
         } else {
