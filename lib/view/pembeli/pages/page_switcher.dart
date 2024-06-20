@@ -67,37 +67,60 @@ class _PageSwitcherPembeliState extends State<PageSwitcherPembeli> {
       tapi yang dijalankan(init statem, dll) hanya halaman yang ditampilkan, 
       jadi tidak semua fungsi di semua halaman dijalankan sekaligus seperti di indexed stack biasa
       */
-      body: IndexedStack(
-        index: index,
-        children: const [
-          Home(),
-          Pembeli(),
-        ],
-      ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 40),
-        child: GNav(tabBorderRadius: 15, tabs: [
-          GButton(
-            icon: Icons.home_rounded,
-            text: 'Home',
-            onPressed: () {
-              setState(() {
-                index = 0;
-              });
-            },
+      body: Stack(
+        children: [
+          IndexedStack(
+            index: index,
+            children: const [
+              Home(),
+              Pembeli(),
+            ],
           ),
-          GButton(
-            icon: Icons.map,
-            text: 'eksplore',
-            onPressed: () {
-              setState(
-                () {
-                  index = 1;
-                },
-              );
-            },
-          )
-        ]),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 20),
+            child: Align(
+                alignment: Alignment.bottomCenter,
+                child: Container(
+                    width: 220,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      boxShadow: [
+                        BoxShadow(
+                          blurRadius: 20,
+                          color: Colors.black.withOpacity(0.1),
+                        ),
+                      ],
+                      borderRadius: BorderRadius.circular(100),
+                    ),
+                    child: GNav(
+                      iconSize: 20,
+                      tabBackgroundColor: Colors.orange.shade200,
+                      tabBorderRadius: 100,
+                      tabs: [
+                        GButton(
+                          icon: Icons.home_rounded,
+                          text: 'Home',
+                          onPressed: () {
+                            setState(() {
+                              index = 0;
+                            });
+                          },
+                        ),
+                        GButton(
+                          icon: Icons.map,
+                          text: 'eksplore',
+                          onPressed: () {
+                            setState(
+                              () {
+                                index = 1;
+                              },
+                            );
+                          },
+                        )
+                      ],
+                    ))),
+          ),
+        ],
       ),
     );
   }
