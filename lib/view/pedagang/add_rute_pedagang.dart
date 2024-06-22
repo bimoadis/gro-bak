@@ -38,12 +38,13 @@ class _AddRutePedagangState extends State<AddRutePedagang> {
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              
               DropdownButtonFormField<Region>(
-                hint: Text('Pilih Provinsi'),
+                hint: const Text('Pilih Provinsi'),
                 value: selectedProvince,
                 isExpanded: true,
                 decoration: InputDecoration(
@@ -55,7 +56,7 @@ class _AddRutePedagangState extends State<AddRutePedagang> {
                   return DropdownMenuItem<Region>(
                     value: province,
                     child: Text(province.name,
-                        style: TextStyle(color: Colors.black)),
+                        style: const TextStyle(color: Colors.black)),
                   );
                 }).toList(),
                 onChanged: (Region? newValue) {
@@ -71,7 +72,7 @@ class _AddRutePedagangState extends State<AddRutePedagang> {
               ),
               SizedBox(height: 16.0),
               DropdownButtonFormField<Region>(
-                hint: Text('Pilih Kabupaten/Kota'),
+                hint: const Text('Pilih Kabupaten/Kota'),
                 value: selectedRegency,
                 isExpanded: true,
                 decoration: InputDecoration(
@@ -83,7 +84,7 @@ class _AddRutePedagangState extends State<AddRutePedagang> {
                   return DropdownMenuItem<Region>(
                     value: regency,
                     child: Text(regency.name,
-                        style: TextStyle(color: Colors.black)),
+                        style: const TextStyle(color: Colors.black)),
                   );
                 }).toList(),
                 onChanged: (Region? newValue) {
@@ -97,9 +98,9 @@ class _AddRutePedagangState extends State<AddRutePedagang> {
                 itemHeight: 48.0,
                 dropdownColor: Colors.white,
               ),
-              SizedBox(height: 16.0),
+              const SizedBox(height: 16.0),
               DropdownButtonFormField<Region>(
-                hint: Text('Pilih Kecamatan'),
+                hint: const Text('Pilih Kecamatan'),
                 value: selectedDistrict,
                 isExpanded: true,
                 decoration: InputDecoration(
@@ -111,7 +112,7 @@ class _AddRutePedagangState extends State<AddRutePedagang> {
                   return DropdownMenuItem<Region>(
                     value: district,
                     child: Text(district.name,
-                        style: TextStyle(color: Colors.black)),
+                        style: const TextStyle(color: Colors.black)),
                   );
                 }).toList(),
                 onChanged: (Region? newValue) {
@@ -122,7 +123,7 @@ class _AddRutePedagangState extends State<AddRutePedagang> {
                 itemHeight: 48.0,
                 dropdownColor: Colors.white,
               ),
-              SizedBox(height: 16.0),
+              const SizedBox(height: 16.0),
               TextField(
                 controller: _addressController,
                 decoration: InputDecoration(
@@ -132,12 +133,12 @@ class _AddRutePedagangState extends State<AddRutePedagang> {
                   ),
                 ),
               ),
-              SizedBox(height: 16.0),
+              const SizedBox(height: 16.0),
               Row(
                 children: [
                   Expanded(
                     child: Padding(
-                      padding: EdgeInsets.only(right: 8.0),
+                      padding: const EdgeInsets.only(right: 8.0),
                       child: TextField(
                         controller: _startTimeController,
                         onTap: () {
@@ -154,7 +155,7 @@ class _AddRutePedagangState extends State<AddRutePedagang> {
                   ),
                   Expanded(
                     child: Padding(
-                      padding: EdgeInsets.only(left: 8.0),
+                      padding: const EdgeInsets.only(left: 8.0),
                       child: TextField(
                         controller: _endTimeController,
                         onTap: () {
@@ -171,7 +172,7 @@ class _AddRutePedagangState extends State<AddRutePedagang> {
                   ),
                 ],
               ),
-              SizedBox(height: 16.0),
+              const SizedBox(height: 16.0),
               ElevatedButton(
                 onPressed: _saveAddress,
                 style: ElevatedButton.styleFrom(
@@ -180,7 +181,7 @@ class _AddRutePedagangState extends State<AddRutePedagang> {
                     borderRadius: BorderRadius.circular(8.0),
                   ),
                 ),
-                child: Text(
+                child: const Text(
                   'Simpan Alamat',
                   style: TextStyle(
                     color: Color(0xFF060100),

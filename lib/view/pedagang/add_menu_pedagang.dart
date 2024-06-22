@@ -1,14 +1,32 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:get/get.dart';
 import 'package:gro_bak/view/widget/bottom_bar.dart';
+import 'package:image_picker/image_picker.dart';
+
+// class AddMenuPedagang extends StatefulWidget {
+//   const AddMenuPedagang({Key? key}) : super(key: key);
+//   @override
+//   State<AddMenuPedagang> createState() => _MenuPedagangState();
+// }
+
+// class _MenuPedagangState extends State<AddMenuPedagang> {
+
+// }
 
 class AddMenuPedagang extends StatefulWidget {
+  const AddMenuPedagang({super.key});
+
   @override
-  State<AddMenuPedagang> createState() => _MenuPedagangState();
+  State<AddMenuPedagang> createState() => _AddMenuPedagangState();
 }
 
-class _MenuPedagangState extends State<AddMenuPedagang> {
+class _AddMenuPedagangState extends State<AddMenuPedagang> {
   final _auth = FirebaseAuth.instance;
 
   final TextEditingController _namaProductController = TextEditingController();
@@ -16,11 +34,115 @@ class _MenuPedagangState extends State<AddMenuPedagang> {
       TextEditingController();
   final TextEditingController _hargaController = TextEditingController();
 
+  final ImagePicker _picker = ImagePicker();
+  Rx<XFile?> _imageFile = Rx<XFile?>(null);
+  var downloadURL = ''.obs;
+
+  Rx<File?> compressedImage = Rx<File?>(null);
+
+  Future<void> _uploadImageToFirebase(File file) async {
+    try {
+      final storageRef = FirebaseStorage.instance
+          .ref()
+          .child('uploads/${DateTime.now().millisecondsSinceEpoch}.jpg');
+      await storageRef.putFile(file);
+      downloadURL.value = await storageRef.getDownloadURL();
+      print('Upload complete. Download URL: $downloadURL');
+    } catch (e) {
+      print('Error uploading image: $e');
+    }
+  }
+
+  Future<void> _pickImage(int option, BuildContext context) async {
+    final XFile? pickedFile = (option == 1)
+        ? await _picker.pickImage(source: ImageSource.camera)
+        : await _picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      compressedImage.value = await _compressImage(File(pickedFile.path));
+
+      Navigator.pop(context);
+    }
+  }
+
+  myShowDialog() {
+    return showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 16),
+            GestureDetector(
+              onTap: () {
+                _pickImage(1, context);
+                setState(() {});
+              },
+              child: Container(
+                height: 50,
+                margin: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                ),
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Center(
+                  child: Text('ambil foto'),
+                ),
+              ),
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            GestureDetector(
+              onTap: () {
+                _pickImage(2, context);
+                setState(() {});
+              },
+              child: Container(
+                height: 50,
+                margin: const EdgeInsets.symmetric(horizontal: 16),
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Center(
+                  child: Text('ambil dari galeri'),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<File?> _compressImage(File file) async {
+    final filePath = file.absolute.path;
+    final lastIndex = filePath.lastIndexOf(RegExp(r'.jp'));
+
+    final splitted = filePath.substring(0, (lastIndex));
+    final outPath = "${splitted}_out${filePath.substring(lastIndex)}";
+
+    var result = await FlutterImageCompress.compressAndGetFile(
+      file.absolute.path,
+      outPath,
+      quality: 50,
+    );
+    print(file.lengthSync());
+
+    return File(result!.path);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Tambahkan Menu'),
+        title: const Text('Tambahkan Menu'),
         centerTitle: true,
       ),
       body: SingleChildScrollView(
@@ -29,6 +151,108 @@ class _MenuPedagangState extends State<AddMenuPedagang> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Obx(
+                () => (compressedImage.value == null)
+                    ? GestureDetector(
+                        onTap: () {
+                          myShowDialog();
+                        },
+                        child: Container(
+                          height: 300,
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade200,
+                            border: Border.all(
+                                color: Colors.grey.shade300.withOpacity(0.8)),
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                          child: Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.camera_alt_rounded,
+                                    size: 40, color: Colors.grey.shade400),
+                                const SizedBox(
+                                  height: 10,
+                                ),
+                                const Text('tambahkan foto produk')
+                              ],
+                            ),
+                          ),
+                        ),
+                      )
+                    : Image.file(
+                        File(compressedImage.value!.path),
+                        height: 300,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                      ),
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              Obx(
+                () => (compressedImage.value != null)
+                    ? Row(
+                        children: [
+                          GestureDetector(
+                            onTap: () {
+                              _uploadImageToFirebase(compressedImage.value!);
+                            },
+                            child: Container(
+                              width: 80,
+                              height: 35,
+                              decoration: BoxDecoration(
+                                  color: Colors.green.shade100,
+                                  borderRadius: BorderRadius.circular(5)),
+                              child: Center(
+                                child: (downloadURL.value.isEmpty)
+                                    ? const Text('Upload')
+                                    : const Text(
+                                        'Uploaded',
+                                        style: TextStyle(color: Colors.green),
+                                      ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 30),
+                          (downloadURL.value.isEmpty)
+                              ? GestureDetector(
+                                  onTap: () {
+                                    myShowDialog();
+                                  },
+                                  child: Container(
+                                    width: 80,
+                                    height: 35,
+                                    decoration: BoxDecoration(
+                                        color: Colors.grey.shade300,
+                                        borderRadius: BorderRadius.circular(5)),
+                                    child: const Center(
+                                      child: Text('Ganti'),
+                                    ),
+                                  ),
+                                )
+                              : Container(
+                                  width: 80,
+                                  height: 35,
+                                  decoration: BoxDecoration(
+                                      color: Colors.grey.shade100,
+                                      border: Border.all(
+                                          color: Colors.grey.shade200
+                                              .withOpacity(0.8)),
+                                      borderRadius: BorderRadius.circular(5)),
+                                  child: const Center(
+                                    child: Text('Ganti',
+                                        style: TextStyle(color: Colors.grey)),
+                                  ),
+                                ),
+                        ],
+                      )
+                    : const SizedBox(),
+              ),
+              const SizedBox(
+                height: 30,
+              ),
               TextField(
                 controller: _namaProductController,
                 decoration: InputDecoration(
@@ -38,7 +262,7 @@ class _MenuPedagangState extends State<AddMenuPedagang> {
                   ),
                 ),
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               TextField(
                 controller: _detailProductController,
                 decoration: InputDecoration(
@@ -48,7 +272,7 @@ class _MenuPedagangState extends State<AddMenuPedagang> {
                   ),
                 ),
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               TextField(
                 controller: _hargaController,
                 decoration: InputDecoration(
@@ -58,16 +282,16 @@ class _MenuPedagangState extends State<AddMenuPedagang> {
                   ),
                 ),
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: _saveMenu,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFFFEC901),
+                  backgroundColor: const Color(0xFFFEC901),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8.0),
                   ),
                 ),
-                child: Text(
+                child: const Text(
                   'Simpan Menu',
                   style: TextStyle(
                     color: Color(0xFF060100),
@@ -86,14 +310,21 @@ class _MenuPedagangState extends State<AddMenuPedagang> {
     if (_namaProductController.text.isEmpty ||
         _detailProductController.text.isEmpty ||
         _hargaController.text.isEmpty) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Please fill all fields')));
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please fill all fields')));
+      return;
+    }
+    if (downloadURL.value.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('Please upload image'),
+        backgroundColor: Colors.red,
+      ));
       return;
     }
 
     String nama = _namaProductController.text;
     try {
-      if (nama.isNotEmpty) {
+      if (nama.isNotEmpty || downloadURL.value.isNotEmpty) {
         FirebaseFirestore firebaseFirestore = FirebaseFirestore.instance;
         var user = _auth.currentUser;
         if (user != null) {
@@ -104,6 +335,7 @@ class _MenuPedagangState extends State<AddMenuPedagang> {
           List<dynamic> rute = docSnapshot['menu'] ?? [];
 
           rute.add({
+            "imageURL": downloadURL.value,
             "nama_produk": _namaProductController.text,
             "deskripsi_produk": _detailProductController.text,
             "harga": _hargaController.text,

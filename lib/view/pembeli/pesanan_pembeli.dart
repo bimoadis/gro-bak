@@ -29,7 +29,7 @@ class _OrderFormState extends State<OrderForm> {
   void initState() {
     super.initState();
     // Set total harga awal
-    _totalPrice = int.parse(widget.menu['harga']);
+    _totalPrice = widget.menu['harga'];
   }
 
   Future<void> createOrder(String productName, String productDescription,
@@ -64,12 +64,12 @@ class _OrderFormState extends State<OrderForm> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Container(
-                  margin: EdgeInsets.symmetric(vertical: 8.0),
-                  padding: EdgeInsets.all(16.0),
+                  margin: const EdgeInsets.symmetric(vertical: 8.0),
+                  padding: const EdgeInsets.all(16.0),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(8.0),
-                    boxShadow: [
+                    boxShadow: const [
                       BoxShadow(
                         color: Colors.black26,
                         blurRadius: 6.0,
@@ -90,18 +90,18 @@ class _OrderFormState extends State<OrderForm> {
                               fit: BoxFit.cover,
                             ),
                           ),
-                          SizedBox(width: 16.0),
+                          const SizedBox(width: 16.0),
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
                                 '${widget.menu['nama_produk']}',
-                                style: TextStyle(
+                                style: const TextStyle(
                                   fontSize: 18.0,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              SizedBox(height: 4.0),
+                              const SizedBox(height: 4.0),
                               Text(
                                 'Harga: Rp.${widget.menu['harga']}',
                                 style: TextStyle(
@@ -110,7 +110,7 @@ class _OrderFormState extends State<OrderForm> {
                               ),
                               Row(
                                 children: [
-                                  Text('Jumlah: '),
+                                  const Text('Jumlah: '),
                                   IconButton(
                                     onPressed: () {
                                       setState(() {
@@ -123,9 +123,9 @@ class _OrderFormState extends State<OrderForm> {
                                     },
                                     icon: Icon(Icons.remove),
                                   ),
-                                  SizedBox(width: 6.0),
+                                  const SizedBox(width: 6.0),
                                   Text('$_quantity'),
-                                  SizedBox(width: 6.0),
+                                  const SizedBox(width: 6.0),
                                   IconButton(
                                     onPressed: () {
                                       setState(() {
@@ -134,7 +134,7 @@ class _OrderFormState extends State<OrderForm> {
                                             .menu['harga']); // Tambah harga
                                       });
                                     },
-                                    icon: Icon(Icons.add),
+                                    icon: const Icon(Icons.add),
                                   ),
                                 ],
                               ),
@@ -142,7 +142,7 @@ class _OrderFormState extends State<OrderForm> {
                           ),
                         ],
                       ),
-                      SizedBox(height: 8.0),
+                      const SizedBox(height: 8.0),
                       Divider(color: Colors.grey[300]),
                       Text(
                         '${widget.menu['deskripsi_produk']}',
@@ -150,11 +150,11 @@ class _OrderFormState extends State<OrderForm> {
                           color: Colors.grey[600],
                         ),
                       ),
-                      SizedBox(height: 8.0),
+                      const SizedBox(height: 8.0),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Column(
+                          const Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
@@ -181,7 +181,7 @@ class _OrderFormState extends State<OrderForm> {
                         ],
                       ),
                       TextFormField(
-                        decoration: InputDecoration(labelText: 'Alamat'),
+                        decoration: const InputDecoration(labelText: 'Alamat'),
                         onSaved: (value) {
                           _address = value;
                         },
@@ -192,17 +192,17 @@ class _OrderFormState extends State<OrderForm> {
                           return null;
                         },
                       ),
-                      SizedBox(height: 16),
+                      const SizedBox(height: 16),
                       TextFormField(
-                        decoration: InputDecoration(labelText: 'Catatan'),
+                        decoration: const InputDecoration(labelText: 'Catatan'),
                         onSaved: (value) {
                           _notes = value;
                         },
                       ),
-                      SizedBox(height: 16),
+                      const SizedBox(height: 16),
                       DropdownButtonFormField<String>(
-                        decoration:
-                            InputDecoration(labelText: 'Opsi Pengantaran'),
+                        decoration: const InputDecoration(
+                            labelText: 'Opsi Pengantaran'),
                         value: _deliveryOption,
                         onChanged: (String? newValue) {
                           setState(() {
@@ -217,7 +217,7 @@ class _OrderFormState extends State<OrderForm> {
                           );
                         }).toList(),
                       ),
-                      SizedBox(height: 20),
+                      const SizedBox(height: 20),
                     ],
                   ),
                 ),
@@ -225,14 +225,14 @@ class _OrderFormState extends State<OrderForm> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: <Widget>[
                     ElevatedButton(
-                      child: Text('Pesan'),
+                      child: const Text('Pesan'),
                       onPressed: () async {
                         if (_formKey.currentState!.validate()) {
                           _formKey.currentState!.save();
                           await createOrder(
                             widget.menu['nama_produk'],
                             widget.menu['deskripsi_produk'],
-                            widget.menu['harga'].toString(),
+                            widget.menu['harga'],
                             _deliveryOption, // Pass the delivery option
                           );
                           Navigator.of(context).pop();

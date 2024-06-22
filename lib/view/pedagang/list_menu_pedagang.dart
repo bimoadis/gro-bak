@@ -40,7 +40,7 @@ class _ListMenuPageState extends State<ListMenuPage> {
   void _navigateToAddMenuPage() {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => AddMenuPedagang(),
+        builder: (context) => const AddMenuPedagang(),
       ),
     );
   }
@@ -49,12 +49,12 @@ class _ListMenuPageState extends State<ListMenuPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('List Menu'),
+        title: const Text('List Menu'),
         centerTitle: true,
       ),
       body: menuList.isEmpty
-          ? Padding(
-              padding: const EdgeInsets.all(24.0),
+          ? const Padding(
+              padding: EdgeInsets.all(24.0),
               child: Center(
                   child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -73,7 +73,7 @@ class _ListMenuPageState extends State<ListMenuPage> {
               itemBuilder: (context, index) {
                 var menu = menuList[index];
                 return Card(
-                  margin: EdgeInsets.all(8.0),
+                  margin: const EdgeInsets.all(8.0),
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Column(
@@ -82,14 +82,14 @@ class _ListMenuPageState extends State<ListMenuPage> {
                           children: [
                             ClipRRect(
                               borderRadius: BorderRadius.circular(8.0),
-                              child: Image.asset(
-                                'assets/images/bakso.jpeg',
+                              child: Image.network(
+                                '${menu['imageURL']}',
                                 width: 120,
                                 height: 90,
                                 fit: BoxFit.cover,
                               ),
                             ),
-                            SizedBox(width: 10),
+                            const SizedBox(width: 10),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -116,9 +116,10 @@ class _ListMenuPageState extends State<ListMenuPage> {
               },
             ),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'addMenu',
         onPressed: _navigateToAddMenuPage,
-        child: Icon(Icons.add),
         backgroundColor: Colors.blue,
+        child: const Icon(Icons.add),
       ),
     );
   }
