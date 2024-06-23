@@ -4,7 +4,6 @@ import 'dart:ui' as ui;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:gro_bak/repository/getLongLat.dart';
@@ -163,6 +162,7 @@ class _PembeliState extends State<Pembeli> {
                 position: position,
                 onTap: () {
                   _showBottomSheet(
+                      data['profileImage'],
                       data['nama_usaha'],
                       data['nama'],
                       data['rute'],
@@ -186,19 +186,22 @@ class _PembeliState extends State<Pembeli> {
   }
 
   void _showBottomSheet(
-      String nameMerchant,
-      String name,
-      List<dynamic> seluruhRute,
-      List<dynamic> menu,
-      double latitude,
-      double longitude,
-      String uidPedagang,
-      String uidPembeli) {
+    String imageProfile,
+    String nameMerchant,
+    String name,
+    List<dynamic> seluruhRute,
+    List<dynamic> menu,
+    double latitude,
+    double longitude,
+    String uidPedagang,
+    String uidPembeli,
+  ) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       builder: (BuildContext context) {
         return BottomSheetWidget(
+          imageURL: imageProfile,
           nameMerchant: nameMerchant,
           name: name,
           seluruhRute: seluruhRute,

@@ -1,8 +1,14 @@
+import 'dart:io';
+
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:get/get.dart';
 import 'package:gro_bak/repository/getAllDataMerchant.dart';
 import 'package:gro_bak/view/pedagang/list_rute_pedagang.dart';
+import 'package:image_picker/image_picker.dart';
 import '../login.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -37,6 +43,67 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
+  final ImagePicker _picker = ImagePicker();
+  Rx<XFile?> _imageFile = Rx<XFile?>(null);
+  var downloadURL = ''.obs;
+
+  Rx<File?> compressedImage = Rx<File?>(null);
+
+  Future<void> _uploadImageToFirebase(File file) async {
+    try {
+      final storageRef = FirebaseStorage.instance
+          .ref()
+          .child('profile/${DateTime.now().millisecondsSinceEpoch}.jpg');
+      await storageRef.putFile(file);
+      downloadURL.value = await storageRef.getDownloadURL();
+      print('Upload complete. Download URL: $downloadURL');
+      _updateUserDetails();
+      Navigator.pop(context);
+    } catch (e) {
+      print('Error uploading image: $e');
+    }
+  }
+
+  Future<void> _pickImage(int option, BuildContext context) async {
+    final XFile? pickedFile = (option == 1)
+        ? await _picker.pickImage(source: ImageSource.camera)
+        : await _picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      compressedImage.value = await _compressImage(File(pickedFile.path));
+      _uploadImageToFirebase(compressedImage.value!);
+    }
+  }
+
+  Future<File?> _compressImage(File file) async {
+    final filePath = file.absolute.path;
+    final lastIndex = filePath.lastIndexOf(RegExp(r'.jp'));
+
+    final splitted = filePath.substring(0, (lastIndex));
+    final outPath = "${splitted}_out${filePath.substring(lastIndex)}";
+
+    var result = await FlutterImageCompress.compressAndGetFile(
+      file.absolute.path,
+      outPath,
+      quality: 50,
+    );
+    print(file.lengthSync());
+
+    return File(result!.path);
+  }
+
+  _updateUserDetails() async {
+    if (currentUser != null) {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(currentUser!.uid)
+          .update({
+        'profileImage': downloadURL.value,
+      });
+      _fetchData();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final userMap = userData?.data() as Map<String, dynamic>? ?? {};
@@ -49,38 +116,130 @@ class _ProfilePageState extends State<ProfilePage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("Gro-bak"),
+        title: const Text("Gro-bak"),
       ),
       body: userData == null || merchantData == null
-          ? Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator())
           : Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  SizedBox(height: 50),
-                  CircleAvatar(
-                    radius: 50,
-                    backgroundImage:
-                        AssetImage('assets/images/profile-none.jpg'),
-                    child: Icon(Icons.person, size: 50),
+                  const SizedBox(height: 50),
+                  SizedBox(
+                    child: Stack(
+                      children: [
+                        Obx(() {
+                          if (userData!['profileImage'] != null) {
+                            downloadURL.value = userData!['profileImage'];
+                          }
+                          return (downloadURL.value == '')
+                              ? const CircleAvatar(
+                                  radius: 50,
+                                  backgroundColor: Colors.deepPurple,
+                                  backgroundImage: AssetImage(
+                                      'assets/images/profile-none.jpg'),
+                                  child: Icon(Icons.person, size: 50),
+                                )
+                              : CircleAvatar(
+                                  radius: 50,
+                                  backgroundImage:
+                                      Image.network(userData!['profileImage'])
+                                          .image,
+                                  child: const SizedBox(),
+                                );
+                        }),
+                        Positioned(
+                          bottom: 0,
+                          right: 0,
+                          child: GestureDetector(
+                            onTap: () {
+                              showModalBottomSheet(
+                                context: context,
+                                builder: (context) {
+                                  return Container(
+                                    height: 150,
+                                    padding: const EdgeInsets.all(20),
+                                    child: Column(
+                                      children: [
+                                        const Text(
+                                          "Pilih sumber gambar",
+                                          style: TextStyle(
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 20),
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceEvenly,
+                                          children: [
+                                            GestureDetector(
+                                              onTap: () {
+                                                _pickImage(1, context);
+                                              },
+                                              child: const Column(
+                                                children: [
+                                                  Icon(Icons.camera),
+                                                  Text("Kamera"),
+                                                ],
+                                              ),
+                                            ),
+                                            GestureDetector(
+                                              onTap: () {
+                                                _pickImage(2, context);
+                                              },
+                                              child: const Column(
+                                                children: [
+                                                  Icon(Icons.image),
+                                                  Text("Galeri"),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              );
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: const BoxDecoration(
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black,
+                                    blurRadius: 5,
+                                  ),
+                                ],
+                                color: Colors.white,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(Icons.edit,
+                                  color: Colors.black, size: 20),
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
                   ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   Text(
                     email,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 18,
                     ),
                   ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   buildProfileRow(Icons.work, role),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   buildProfileRow(Icons.business, namaUsaha),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   buildProfileRow(Icons.phone, nomorTelepon),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   buildRuteDagangButton(
                       context), // Modified button for "Rute Dagang"
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   buildLogoutButton(context), // Added logout button
                 ],
               ),
@@ -100,7 +259,7 @@ class _ProfilePageState extends State<ProfilePage> {
         child: Row(
           children: [
             Icon(icon),
-            SizedBox(width: 20),
+            const SizedBox(width: 20),
             Text(
               value,
               style: TextStyle(
@@ -207,3 +366,14 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 }
+
+
+
+        // 'timestamp': userData!['timestamp'],
+        // 'phone_number': userData!['phoneNumber'],
+        // 'longitude': userData!['longitude'],
+        // 'latitude': userData!['latitude'],
+        // 'nama': userData!['nama'],
+        // 'role': userData!['role'],
+        // 'email': userData!['email'],
+        // 'profileImage': downloadURL.value,

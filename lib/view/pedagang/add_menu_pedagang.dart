@@ -9,15 +9,6 @@ import 'package:get/get.dart';
 import 'package:gro_bak/view/widget/bottom_bar.dart';
 import 'package:image_picker/image_picker.dart';
 
-// class AddMenuPedagang extends StatefulWidget {
-//   const AddMenuPedagang({Key? key}) : super(key: key);
-//   @override
-//   State<AddMenuPedagang> createState() => _MenuPedagangState();
-// }
-
-// class _MenuPedagangState extends State<AddMenuPedagang> {
-
-// }
 
 class AddMenuPedagang extends StatefulWidget {
   const AddMenuPedagang({super.key});
@@ -339,7 +330,6 @@ class _AddMenuPedagangState extends State<AddMenuPedagang> {
             "nama_produk": _namaProductController.text,
             "deskripsi_produk": _detailProductController.text,
             "harga": _hargaController.text,
-            "foto_produk": '',
           });
 
           await ref.doc(user.uid).update({'menu': rute});

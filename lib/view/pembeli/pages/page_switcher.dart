@@ -71,9 +71,9 @@ class _PageSwitcherPembeliState extends State<PageSwitcherPembeli> {
         children: [
           IndexedStack(
             index: index,
-            children: const [
+            children: [
               Home(),
-              Pembeli(),
+              const Pembeli(),
             ],
           ),
           Padding(

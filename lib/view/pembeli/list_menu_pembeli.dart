@@ -47,7 +47,7 @@ class _ListMenuPesananState extends State<ListMenuPesanan> {
                 itemBuilder: (context, index) {
                   var menu = menuList[index];
                   return Container(
-                    margin: EdgeInsets.symmetric(vertical: 8.0),
+                    margin: const EdgeInsets.symmetric(vertical: 8.0),
                     // padding: EdgeInsets.all(16.0),
                     decoration: BoxDecoration(
                       color: Colors.white,
@@ -68,8 +68,8 @@ class _ListMenuPesananState extends State<ListMenuPesanan> {
                             children: [
                               ClipRRect(
                                 borderRadius: BorderRadius.circular(8.0),
-                                child: Image.asset(
-                                  'assets/images/bakso.jpeg',
+                                child: Image.network(
+                                  '${menu['imageURL']}',
                                   width: 120,
                                   height: 90,
                                   fit: BoxFit.cover,

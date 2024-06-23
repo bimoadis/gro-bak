@@ -29,7 +29,7 @@ class _OrderFormState extends State<OrderForm> {
   void initState() {
     super.initState();
     // Set total harga awal
-    _totalPrice = widget.menu['harga'];
+    _totalPrice = int.parse(widget.menu['harga']);
   }
 
   Future<void> createOrder(String productName, String productDescription,
@@ -83,8 +83,8 @@ class _OrderFormState extends State<OrderForm> {
                         children: [
                           ClipRRect(
                             borderRadius: BorderRadius.circular(8.0),
-                            child: Image.asset(
-                              'assets/images/bakso.jpeg',
+                            child: Image.network(
+                              widget.menu['imageURL'],
                               width: 80,
                               height: 80,
                               fit: BoxFit.cover,

@@ -10,9 +10,11 @@ class BottomSheetWidget extends StatelessWidget {
   final double latitude;
   final double longitude;
   final String uidPedagang;
+  final String imageURL;
   final String uidPembeli;
 
   BottomSheetWidget({
+    required this.imageURL,
     required this.nameMerchant,
     required this.name,
     required this.seluruhRute,
@@ -36,7 +38,7 @@ class BottomSheetWidget extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              Padding(
+              const Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
                 child: Text(
                   'Detail Pedagang',
@@ -52,8 +54,8 @@ class BottomSheetWidget extends StatelessWidget {
                     child: Container(
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(8.0),
-                        child: Image.asset(
-                          'assets/images/bakso.jpeg',
+                        child: Image.network(
+                          imageURL,
                           width: 120,
                           height: 90,
                           fit: BoxFit.cover,

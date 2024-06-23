@@ -66,7 +66,7 @@ class _PedagangState extends State<Pedagang> {
       length: 2,
       child: Scaffold(
         appBar: AppBar(
-          title: Text(
+          title: const Text(
             "Gro-bak",
             style: TextStyle(
               fontSize: 32,

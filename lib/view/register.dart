@@ -94,8 +94,9 @@ class _RegisterState extends State<Register> {
                           });
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              _role == "Pembeli" ? const Color(0xFFFEC901) : null,
+                          backgroundColor: _role == "Pembeli"
+                              ? const Color(0xFFFEC901)
+                              : null,
                           elevation: 0,
                           shadowColor: Colors.transparent,
                         ),
@@ -116,8 +117,9 @@ class _RegisterState extends State<Register> {
                           });
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              _role == "Pedagang" ? const Color(0xFFFEC901) : null,
+                          backgroundColor: _role == "Pedagang"
+                              ? const Color(0xFFFEC901)
+                              : null,
                           elevation: 0,
                           shadowColor: Colors.transparent,
                         ),
@@ -242,7 +244,7 @@ class _RegisterState extends State<Register> {
                       ),
                     ],
                   ),
-                 const SizedBox(height: 20),
+                  const SizedBox(height: 20),
                 ],
               ),
             ),
@@ -300,6 +302,7 @@ class _RegisterState extends State<Register> {
       'rute': [],
       'menu': [],
       'status': 'tutup',
+      'profileImage': '',
     });
   }
 
