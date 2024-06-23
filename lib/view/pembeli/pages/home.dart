@@ -69,92 +69,115 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(body: Obx(() {
-      return Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 24,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Pedagang terdekat',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
+    return Scaffold(
+        backgroundColor: Colors.orange.shade100.withOpacity(0.2),
+        body: Obx(() {
+          return Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 24,
             ),
-            const SizedBox(
-              height: 10,
-            ),
-            (_combinedDataFuture.value == null)
-                ? const Center(child: CircularProgressIndicator())
-                : Expanded(
-                    child: ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: _combinedDataFuture.value!.length,
-                      itemBuilder: (context, index) {
-                        return GestureDetector(
-                          onTap: () {
-                            _showBottomSheet(
-                                _combinedDataFuture.value![index]
-                                    ['profileImage'],
-                                _combinedDataFuture.value![index]['nama_usaha'],
-                                _combinedDataFuture.value![index]['nama'],
-                                _combinedDataFuture.value![index]['rute'],
-                                _combinedDataFuture.value![index]['menu'],
-                                _combinedDataFuture.value![index]['latitude'],
-                                _combinedDataFuture.value![index]['longitude'],
-                                _combinedDataFuture.value![index]['uid'],
-                                FirebaseAuth.instance.currentUser!.uid);
-                          },
-                          child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Container(
-                                  clipBehavior: Clip.hardEdge,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(15),
-                                  ),
-                                  child: Image.network(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(
+                  height: 20,
+                ),
+                Text(
+                  'Pedagang terdekat',
+                  style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.black.withOpacity(0.7)),
+                ),
+                const SizedBox(
+                  height: 10,
+                ),
+                (_combinedDataFuture.value == null)
+                    ? const Center(child: CircularProgressIndicator())
+                    : Expanded(
+                        child: ListView.builder(
+                          shrinkWrap: true,
+                          itemCount: _combinedDataFuture.value!.length,
+                          itemBuilder: (context, index) {
+                            return GestureDetector(
+                              onTap: () {
+                                _showBottomSheet(
                                     _combinedDataFuture.value![index]
                                         ['profileImage'],
-                                    width: 100,
-                                    height: 90,
-                                    fit: BoxFit.cover,
-                                  ),
+                                    _combinedDataFuture.value![index]
+                                        ['nama_usaha'],
+                                    _combinedDataFuture.value![index]['nama'],
+                                    _combinedDataFuture.value![index]['rute'],
+                                    _combinedDataFuture.value![index]['menu'],
+                                    _combinedDataFuture.value![index]
+                                        ['latitude'],
+                                    _combinedDataFuture.value![index]
+                                        ['longitude'],
+                                    _combinedDataFuture.value![index]['uid'],
+                                    FirebaseAuth.instance.currentUser!.uid);
+                              },
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(20),
+                                  color:
+                                      Colors.orange.shade100.withOpacity(0.5),
                                 ),
-                                const SizedBox(
-                                  width: 10,
-                                ),
-                                Column(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const SizedBox(
-                                      height: 10,
-                                    ),
-                                    Text(
-                                      _combinedDataFuture.value![index]
-                                          ['nama_usaha'],
-                                      style: TextStyle(
-                                          fontSize: 20,
-                                          color: Colors.black.withOpacity(0.7),
-                                          fontWeight: FontWeight.w500),
-                                    ),
-                                    Text(_combinedDataFuture.value![index]
-                                        ['nama']),
-                                    Text(
-                                      'telfon : ${_combinedDataFuture.value![index]['nomor_telepon']}',
-                                      maxLines: 2,
-                                    ),
-                                  ],
-                                )
-                              ]),
-                        );
-                      },
-                    ),
-                  )
-          ],
-        ),
-      );
-    }));
+                                child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Container(
+                                        clipBehavior: Clip.hardEdge,
+                                        decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(15),
+                                        ),
+                                        child: Image.network(
+                                          _combinedDataFuture.value![index]
+                                              ['profileImage'],
+                                          width: 100,
+                                          height: 90,
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                      const SizedBox(
+                                        width: 10,
+                                      ),
+                                      Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          const SizedBox(
+                                            height: 10,
+                                          ),
+                                          Text(
+                                            _combinedDataFuture.value![index]
+                                                ['nama_usaha'],
+                                            style: TextStyle(
+                                                fontSize: 20,
+                                                color: Colors.black
+                                                    .withOpacity(0.7),
+                                                fontWeight: FontWeight.w700),
+                                          ),
+                                          Text(_combinedDataFuture.value![index]
+                                              ['nama']),
+                                          Text(
+                                            'telfon : ${_combinedDataFuture.value![index]['nomor_telepon']}',
+                                            maxLines: 2,
+                                          ),
+                                        ],
+                                      )
+                                    ]),
+                              ),
+                            );
+                          },
+                        ),
+                      )
+              ],
+            ),
+          );
+        }));
   }
 }

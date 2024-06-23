@@ -311,8 +311,8 @@ class _RutePedagangState extends State<RutePedagang> {
                     child: Container(
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(8.0),
-                        child: Image.asset(
-                          'assets/images/bakso.jpeg',
+                        child: Image.network(
+                          _merchantData!['profileImage'],
                           width: 120,
                           height: 90,
                           fit: BoxFit.cover,

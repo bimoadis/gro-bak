@@ -48,26 +48,41 @@ class _PembeliState extends State<Pembeli> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.orange.shade100.withOpacity(0.2),
       // Agar initial positionnya berada di posisi user
       body: FutureBuilder(
           future: _getCurrentLocation(),
           builder: (context, snapshot) {
             if (_userPosition != null) {
-              return GoogleMap(
-                initialCameraPosition: CameraPosition(
-                  target:
-                      LatLng(_userPosition!.latitude, _userPosition!.longitude),
-                  zoom: 15,
+              return Container(
+                clipBehavior: Clip.hardEdge,
+                margin: const EdgeInsets.symmetric(horizontal: 10),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Colors.black26,
+                      blurRadius: 15,
+                      offset: Offset(0, 5),
+                    ),
+                  ],
                 ),
-                markers: Set<Marker>.from(_markers),
-                onMapCreated: (GoogleMapController controller) {
-                  _controller.complete(controller);
-                },
-                myLocationEnabled: true,
-                zoomControlsEnabled: false,
-                compassEnabled: true,
-                myLocationButtonEnabled: true,
-                mapToolbarEnabled: false,
+                child: GoogleMap(
+                  initialCameraPosition: CameraPosition(
+                    target: LatLng(
+                        _userPosition!.latitude, _userPosition!.longitude),
+                    zoom: 15,
+                  ),
+                  markers: Set<Marker>.from(_markers),
+                  onMapCreated: (GoogleMapController controller) {
+                    _controller.complete(controller);
+                  },
+                  myLocationEnabled: true,
+                  zoomControlsEnabled: false,
+                  compassEnabled: true,
+                  myLocationButtonEnabled: true,
+                  mapToolbarEnabled: false,
+                ),
               );
             } else {
               return const Center(

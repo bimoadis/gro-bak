@@ -5,6 +5,7 @@ import 'package:gro_bak/services/logout.dart';
 import 'package:gro_bak/view/pembeli/list_pesanan.dart';
 import 'package:gro_bak/view/pembeli/pages/Pembeli.dart';
 import 'package:gro_bak/view/pembeli/pages/home.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class PageSwitcherPembeli extends StatefulWidget {
   const PageSwitcherPembeli({super.key});
@@ -16,57 +17,137 @@ class PageSwitcherPembeli extends StatefulWidget {
 class _PageSwitcherPembeliState extends State<PageSwitcherPembeli> {
   int index = 0;
 
+  String getTimeOfDay() {
+    var hour = DateTime.now().hour;
+    if (hour >= 4 && hour < 12) {
+      return 'Pagi';
+    } else if (hour >= 12 && hour < 15) {
+      return 'Siang';
+    } else if (hour >= 15 && hour < 18) {
+      return 'Sore';
+    } else {
+      return 'Malam';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          "Gro-bak",
-          style: TextStyle(
-            fontSize: 32,
-            color: Color(0xFFFEC901),
-            fontWeight: FontWeight.bold,
-            shadows: [
-              Shadow(
-                offset: Offset(1.0, 1.0), // position of the shadow
-                blurRadius: 1.0, // blur effect
-                color: Color(0xFF060100), // semi-transparent black color
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          IconButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => OrdersPage(),
+      appBar: PreferredSize(
+          preferredSize: const Size.fromHeight(80),
+          child: Container(
+            color: Colors.orange.shade100.withOpacity(0.2),
+            child: SafeArea(
+              child: Container(
+                margin: const EdgeInsets.symmetric(horizontal: 10),
+                decoration: BoxDecoration(
+                    color: Colors.orange.shade100.withOpacity(0.7),
+                    borderRadius: BorderRadius.circular(23)),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Column(
+                    children: [
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Selamat ${getTimeOfDay()}!",
+                                style: TextStyle(
+                                  fontSize: 25,
+                                  color: Colors.black.withOpacity(0.7),
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(
+                                // Text widget
+                                "Mau beli apa hari ini ?",
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  color: Colors.black.withOpacity(0.6),
+                                ),
+                              ),
+                            ],
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              IconButton(
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => OrdersPage(),
+                                      ),
+                                    );
+                                  },
+                                  icon: const Icon(Icons.shopping_bag_rounded)),
+                              const SizedBox(width: 10),
+                              IconButton(
+                                  onPressed: () {
+                                    AuthService.logout(context);
+                                  },
+                                  icon: const Icon(Icons.logout_rounded)),
+                            ],
+                          ),
+                          // SvgPicture.asset('assets/images/profile8.svg',
+                          //     height: 50, fit: BoxFit.cover),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-              );
-            },
-            icon: const Icon(
-              Icons.shopping_bag,
-              color: Color(0xFF060100),
+              ),
             ),
-          ),
-          IconButton(
-            onPressed: () {
-              AuthService.logout(context);
-            },
-            icon: const Icon(
-              Icons.logout,
-              color: Color(0xFF060100),
-            ),
-          )
-        ],
-      ),
+          )),
+      // AppBar(
+      //   title: const Text(
+      //     "Gro-bak",
+      //     style: TextStyle(
+      //       fontSize: 32,
+      //       color: Color(0xFFFEC901),
+      //       fontWeight: FontWeight.bold,
+      //       shadows: [
+      //         Shadow(
+      //           offset: Offset(1.0, 1.0), // position of the shadow
+      //           blurRadius: 1.0, // blur effect
+      //           color: Color(0xFF060100), // semi-transparent black color
+      //         ),
+      //       ],
+      //     ),
+      //   ),
+      //   actions: [
+      //     IconButton(
+      //       onPressed: () {
+      // Navigator.push(
+      //   context,
+      //   MaterialPageRoute(
+      //     builder: (context) => OrdersPage(),
+      //   ),
+      // );
+      //       },
+      //       icon: const Icon(
+      //         Icons.shopping_bag,
+      //         color: Color(0xFF060100),
+      //       ),
+      //     ),
+      //     IconButton(
+      //       onPressed: () {
+      // AuthService.logout(context);
+      //       },
+      //       icon: const Icon(
+      //         Icons.logout,
+      //         color: Color(0xFF060100),
+      //       ),
+      //     )
+      //   ],
+      // ),
 
-      /*
-      lazy indexed stack, sebuah fungsi mirip seperti indexed stack 
-      tapi yang dijalankan(init statem, dll) hanya halaman yang ditampilkan, 
-      jadi tidak semua fungsi di semua halaman dijalankan sekaligus seperti di indexed stack biasa
-      */
       body: Stack(
         children: [
           IndexedStack(
