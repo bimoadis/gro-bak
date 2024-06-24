@@ -48,7 +48,7 @@ class _PembeliState extends State<Pembeli> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.orange.shade100.withOpacity(0.2),
+      backgroundColor: Colors.orange.shade100.withOpacity(0.05),
       // Agar initial positionnya berada di posisi user
       body: FutureBuilder(
           future: _getCurrentLocation(),

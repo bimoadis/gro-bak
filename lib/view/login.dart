@@ -19,27 +19,25 @@ class _LoginPageState extends State<LoginPage> {
   bool _isSigning = false;
   final _formKey = GlobalKey<FormState>();
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
-  TextEditingController _emailController = TextEditingController();
+  TextEditingController _numberController = TextEditingController();
   TextEditingController _passwordController = TextEditingController();
 
-  String? _emailError;
+  String? _numberError;
   String? _passwordError;
 
   @override
   void dispose() {
-    _emailController.dispose();
+    _numberController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
 
   void validateInputs() {
     setState(() {
-      if (_emailController.text.isEmpty) {
-        _emailError = "Please enter your email";
-      } else if (!_emailController.text.contains('@')) {
-        _emailError = "Please enter a valid email";
+      if (_numberController.text.isEmpty) {
+        _numberError = "Please enter your number";
       } else {
-        _emailError = null;
+        _numberError = null;
       }
 
       if (_passwordController.text.isEmpty) {
@@ -120,7 +118,7 @@ class _LoginPageState extends State<LoginPage> {
                           height: MediaQuery.of(context).size.height *
                               0.02), // Adding some space before the paragraph
                       const Text(
-                        'Silahkan masukkan email dan password akun anda',
+                        'Silahkan masukkan nomor dan password akun anda',
                         style: TextStyle(
                           color: Colors
                               .grey, // Equivalent to text-zinc-500 in Tailwind CSS
@@ -135,21 +133,22 @@ class _LoginPageState extends State<LoginPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     FormContainerWidget(
-                      controller: _emailController,
-                      hintText: "Email",
+                      controller: _numberController,
+                      hintText: "Number",
                       isPasswordField: false,
                     ),
-                    if (_emailError != null)
+                    if (_numberError != null)
                       Padding(
                         padding: const EdgeInsets.only(top: 5.0),
                         child: Text(
-                          _emailError!,
-                          style: TextStyle(color: Colors.red, fontSize: 12),
+                          _numberError!,
+                          style:
+                              const TextStyle(color: Colors.red, fontSize: 12),
                         ),
                       ),
                   ],
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -163,20 +162,22 @@ class _LoginPageState extends State<LoginPage> {
                         padding: const EdgeInsets.only(top: 5.0),
                         child: Text(
                           _passwordError!,
-                          style: TextStyle(color: Colors.red, fontSize: 12),
+                          style:
+                              const TextStyle(color: Colors.red, fontSize: 12),
                         ),
                       ),
                   ],
                 ),
-                SizedBox(height: 30),
+                const SizedBox(height: 30),
                 GestureDetector(
                   onTap: () {
                     validateInputs();
-                    if (_emailError == null && _passwordError == null) {
+                    if (_numberError == null && _passwordError == null) {
                       setState(() {
                         _isSigning = true;
                       });
-                      signIn(_emailController.text, _passwordController.text);
+                      signIn(formatPhoneNumber(_numberController.text),
+                          _passwordController.text);
                     }
                   },
                   child: Container(
@@ -301,17 +302,17 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  void signIn(String email, String password) async {
+  void signIn(String number, String password) async {
     setState(() {
       _isSigning = true;
-      _emailError = null;
+      _numberError = null;
       _passwordError = null;
     });
 
     try {
       UserCredential userCredential =
           await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: email,
+        email: '${formatPhoneNumber(number)}@number.com',
         password: password,
       );
 
@@ -325,10 +326,10 @@ class _LoginPageState extends State<LoginPage> {
       setState(() {
         _isSigning = false;
         if (e.code == 'invalid-credential') {
-          _emailError = 'Please check your email.';
+          _numberError = 'Please check your number.';
           _passwordError = 'Please check your password.';
         } else {
-          _emailError = 'An error occurred. Please try again.';
+          _numberError = 'An error occurred. Please try again.';
           _passwordError = 'An error occurred. Please try again.';
         }
       });
@@ -337,7 +338,7 @@ class _LoginPageState extends State<LoginPage> {
     } catch (e) {
       setState(() {
         _isSigning = false;
-        _emailError = 'An unknown error occurred. Please try again.';
+        _numberError = 'An unknown error occurred. Please try again.';
         _passwordError = 'An unknown error occurred. Please try again.';
       });
       print('Exception: $e');

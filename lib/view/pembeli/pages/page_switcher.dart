@@ -34,76 +34,80 @@ class _PageSwitcherPembeliState extends State<PageSwitcherPembeli> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: PreferredSize(
-          preferredSize: const Size.fromHeight(80),
-          child: Container(
-            color: Colors.orange.shade100.withOpacity(0.2),
-            child: SafeArea(
-              child: Container(
-                margin: const EdgeInsets.symmetric(horizontal: 10),
-                decoration: BoxDecoration(
-                    color: Colors.orange.shade100.withOpacity(0.7),
-                    borderRadius: BorderRadius.circular(23)),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Column(
-                    children: [
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                "Selamat ${getTimeOfDay()}!",
-                                style: TextStyle(
-                                  fontSize: 25,
-                                  color: Colors.black.withOpacity(0.7),
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              Text(
-                                // Text widget
-                                "Mau beli apa hari ini ?",
-                                style: TextStyle(
-                                  fontSize: 15,
-                                  color: Colors.black.withOpacity(0.6),
-                                ),
-                              ),
-                            ],
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              IconButton(
-                                  onPressed: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => OrdersPage(),
+          preferredSize: const Size.fromHeight(90),
+          child: AppBar(
+            bottom: PreferredSize(
+                preferredSize: const Size.fromHeight(90),
+                child: Container(
+                  color: Colors.orange.shade100.withOpacity(0.05),
+                  child: SafeArea(
+                    child: Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 10),
+                      decoration: BoxDecoration(
+                          color: Colors.orange.shade100.withOpacity(0.7),
+                          borderRadius: BorderRadius.circular(23)),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 15),
+                        child: Column(
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      "Selamat ${getTimeOfDay()}!",
+                                      style: TextStyle(
+                                        fontSize: 25,
+                                        color: Colors.black.withOpacity(0.7),
+                                        fontWeight: FontWeight.bold,
                                       ),
-                                    );
-                                  },
-                                  icon: const Icon(Icons.shopping_bag_rounded)),
-                              const SizedBox(width: 10),
-                              IconButton(
-                                  onPressed: () {
-                                    AuthService.logout(context);
-                                  },
-                                  icon: const Icon(Icons.logout_rounded)),
-                            ],
-                          ),
-                          // SvgPicture.asset('assets/images/profile8.svg',
-                          //     height: 50, fit: BoxFit.cover),
-                        ],
+                                    ),
+                                    Text(
+                                      // Text widget
+                                      "Mau beli apa hari ini ?",
+                                      style: TextStyle(
+                                        fontSize: 15,
+                                        color: Colors.black.withOpacity(0.6),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    IconButton(
+                                        onPressed: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  OrdersPage(),
+                                            ),
+                                          );
+                                        },
+                                        icon: const Icon(
+                                            Icons.shopping_bag_rounded)),
+                                    const SizedBox(width: 10),
+                                    IconButton(
+                                        onPressed: () {
+                                          AuthService.logout(context);
+                                        },
+                                        icon: const Icon(Icons.logout_rounded)),
+                                  ],
+                                ),
+                                // SvgPicture.asset('assets/images/profile8.svg',
+                                //     height: 50, fit: BoxFit.cover),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
-                    ],
+                    ),
                   ),
-                ),
-              ),
-            ),
+                )),
           )),
       // AppBar(
       //   title: const Text(

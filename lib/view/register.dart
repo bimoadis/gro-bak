@@ -17,7 +17,7 @@ class _RegisterState extends State<Register> {
   final _formKey = GlobalKey<FormState>();
 
   final TextEditingController _usernameController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _numberController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _namaUsahaController = TextEditingController();
   final TextEditingController _nomorTeleponController = TextEditingController();
@@ -28,7 +28,7 @@ class _RegisterState extends State<Register> {
   @override
   void dispose() {
     _usernameController.dispose();
-    _emailController.dispose();
+    _numberController.dispose();
     _passwordController.dispose();
     _namaUsahaController.dispose();
     _nomorTeleponController.dispose();
@@ -142,8 +142,8 @@ class _RegisterState extends State<Register> {
                   ),
                   const SizedBox(height: 10),
                   FormContainerWidget(
-                    controller: _emailController,
-                    hintText: "Email",
+                    controller: _numberController,
+                    hintText: "Number",
                     isPasswordField: false,
                   ),
                   const SizedBox(height: 10),
@@ -171,8 +171,8 @@ class _RegisterState extends State<Register> {
                   GestureDetector(
                     onTap: () {
                       _signUp(
-                        email: _emailController.text.isNotEmpty
-                            ? _emailController.text
+                        number: _numberController.text.isNotEmpty
+                            ? _numberController.text
                             : null,
                         role: _role,
                         password: _passwordController.text.isNotEmpty
@@ -255,7 +255,7 @@ class _RegisterState extends State<Register> {
   }
 
   void _signUp({
-    required String? email,
+    required String? number,
     required String? password,
     required String role,
     required String? namaUsaha,
@@ -267,18 +267,18 @@ class _RegisterState extends State<Register> {
         isSigningUp = true;
       });
       try {
-        if (email == null || password == null || username == null) {
+        if (number == null || password == null || username == null) {
           throw Exception("Required fields are missing");
         }
         await _firebaseAuth.createUserWithEmailAndPassword(
-          email: email,
+          email: '${formatPhoneNumber(number)}@number.com',
           password: password,
         );
         String uid = _firebaseAuth.currentUser!.uid;
         if (role == "Pedagang") {
-          await createMerchant(uid, namaUsaha, nomorTelepon);
+          await createMerchant(uid, namaUsaha);
         }
-        await createUser(email, role, username);
+        await createUser(number, role, username);
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => LoginPage()),
@@ -292,31 +292,42 @@ class _RegisterState extends State<Register> {
     }
   }
 
-  Future<void> createMerchant(
-      String uid, String? namaUsaha, String? nomorTelepon) async {
+
+
+  Future<void> createMerchant(String uid, String? namaUsaha) async {
     DocumentReference merchantDocRef =
         FirebaseFirestore.instance.collection('merchant').doc(uid);
     await merchantDocRef.set({
       'nama_usaha': namaUsaha ?? '',
-      'nomor_telepon': nomorTelepon ?? '',
       'rute': [],
       'menu': [],
       'status': 'tutup',
-      'profileImage': '',
     });
   }
 
-  Future<void> createUser(String email, String role, String username) async {
+  Future<void> createUser(String number, String role, String username) async {
     CollectionReference userRef =
         FirebaseFirestore.instance.collection('users');
     await userRef.doc(_firebaseAuth.currentUser!.uid).set({
       'nama': username,
-      'email': email,
       'role': role,
-      'phone_number': '',
+      'phone_number': formatPhoneNumber(number),
       'latitude': '',
       'longitude': '',
       'timestamp': Timestamp.now(),
+      'profileImage': '',
     });
   }
 }
+
+  String formatPhoneNumber(String number) {
+    String input = number;
+    if (input.startsWith('0')) {
+      String formatted = '62${input.substring(1)}';
+      print(formatted);
+      return formatted;
+    } else {
+      print(input);
+      return input;
+    }
+  }

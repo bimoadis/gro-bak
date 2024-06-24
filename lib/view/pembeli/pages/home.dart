@@ -1,9 +1,12 @@
+import 'dart:ffi';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:gro_bak/repository/getLongLat.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:gro_bak/view/widget/bottom_sheet.dart';
+// import 'package:geolocator/geolocator.dart';
 
 class Home extends StatefulWidget {
   Home({super.key});
@@ -27,7 +30,7 @@ class _HomeState extends State<Home> {
           _currentUserPosition!.longitude,
           merchant['latitude'],
           merchant['longitude']);
-      return distance <= 100000; // 100 kilometers
+      return distance <= 5000; // 100 kilometers
     }).toList();
   }
 
@@ -35,6 +38,13 @@ class _HomeState extends State<Home> {
   void initState() {
     super.initState();
     getCombinedData();
+  }
+
+  double calculateDistance(double startLatitude, double startLongitude,
+      double endLatitude, double endLongitude) {
+    double distanceInMeters = Geolocator.distanceBetween(
+        startLatitude, startLongitude, endLatitude, endLongitude);
+    return distanceInMeters / 1000; // convert to kilometers
   }
 
   void _showBottomSheet(
@@ -70,7 +80,7 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Colors.orange.shade100.withOpacity(0.2),
+        backgroundColor: Colors.orange.shade100.withOpacity(0.05),
         body: Obx(() {
           return Padding(
             padding: const EdgeInsets.symmetric(
@@ -116,60 +126,89 @@ class _HomeState extends State<Home> {
                                     _combinedDataFuture.value![index]['uid'],
                                     FirebaseAuth.instance.currentUser!.uid);
                               },
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(20),
-                                  color:
-                                      Colors.orange.shade100.withOpacity(0.5),
-                                ),
-                                child: Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Container(
-                                        clipBehavior: Clip.hardEdge,
-                                        decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(15),
-                                        ),
-                                        child: Image.network(
-                                          _combinedDataFuture.value![index]
-                                              ['profileImage'],
-                                          width: 100,
-                                          height: 90,
-                                          fit: BoxFit.cover,
-                                        ),
-                                      ),
-                                      const SizedBox(
-                                        width: 10,
-                                      ),
-                                      Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
+                              child: Column(
+                                children: [
+                                  const SizedBox(
+                                    height: 15,
+                                  ),
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(20),
+                                      color: Colors.orange.shade100
+                                          .withOpacity(0.5),
+                                    ),
+                                    child: Row(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         children: [
+                                          Container(
+                                            width: 100,
+                                            height: 90,
+                                            clipBehavior: Clip.hardEdge,
+                                            decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(15),
+                                            ),
+                                            child: Image.network(
+                                              _combinedDataFuture.value![index]
+                                                  ['profileImage'],
+                                              width: 100,
+                                              height: 90,
+                                              fit: BoxFit.cover,
+                                            ),
+                                          ),
                                           const SizedBox(
-                                            height: 10,
+                                            width: 10,
                                           ),
-                                          Text(
-                                            _combinedDataFuture.value![index]
-                                                ['nama_usaha'],
-                                            style: TextStyle(
-                                                fontSize: 20,
-                                                color: Colors.black
-                                                    .withOpacity(0.7),
-                                                fontWeight: FontWeight.w700),
-                                          ),
-                                          Text(_combinedDataFuture.value![index]
-                                              ['nama']),
-                                          Text(
-                                            'telfon : ${_combinedDataFuture.value![index]['nomor_telepon']}',
-                                            maxLines: 2,
-                                          ),
-                                        ],
-                                      )
-                                    ]),
+                                          Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.start,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              const SizedBox(
+                                                height: 10,
+                                              ),
+                                              Text(
+                                                _combinedDataFuture
+                                                        .value![index]
+                                                    ['nama_usaha'],
+                                                style: TextStyle(
+                                                    fontSize: 20,
+                                                    color: Colors.black
+                                                        .withOpacity(0.7),
+                                                    fontWeight:
+                                                        FontWeight.w700),
+                                              ),
+                                              Text(_combinedDataFuture
+                                                  .value![index]['nama']),
+                                              const SizedBox(
+                                                height: 5,
+                                              ),
+                                              Row(
+                                                children: [
+                                                  Icon(
+                                                    Icons.location_on,
+                                                    color: Colors.black
+                                                        .withOpacity(0.7),
+                                                    size: 15,
+                                                  ),
+                                                  const SizedBox(
+                                                    width: 5,
+                                                  ),
+                                                  Text(
+                                                    '${calculateDistance(_currentUserPosition!.latitude, _currentUserPosition!.longitude, _combinedDataFuture.value![index]['latitude'], _combinedDataFuture.value![index]['longitude']).toStringAsFixed(2)} km',
+                                                    style: TextStyle(
+                                                        color: Colors.black
+                                                            .withOpacity(0.7)),
+                                                  ),
+                                                ],
+                                              )
+                                            ],
+                                          )
+                                        ]),
+                                  ),
+                                ],
                               ),
                             );
                           },

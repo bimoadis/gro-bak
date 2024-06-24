@@ -12,11 +12,12 @@ class LoginLogic {
   LoginLogic(this._selectedIndex, this._onItemTapped); // Konstruktor
 
   Future<void> signIn(
-      BuildContext context, String email, String password) async {
+      BuildContext context, String number , String password) async {
     try {
+      
       UserCredential userCredential =
           await _firebaseAuth.signInWithEmailAndPassword(
-        email: email,
+        email: number ,
         password: password,
       );
       _route(context);
