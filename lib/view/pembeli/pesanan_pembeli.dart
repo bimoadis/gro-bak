@@ -5,9 +5,11 @@ class OrderForm extends StatefulWidget {
   final Map<String, dynamic> menu;
   final String uidPedagang;
   final String uidPembeli;
+  final String productIndex;
 
   const OrderForm({
     super.key,
+    required this.productIndex,
     required this.menu,
     required this.uidPedagang,
     required this.uidPembeli,
@@ -32,13 +34,19 @@ class _OrderFormState extends State<OrderForm> {
     _totalPrice = int.parse(widget.menu['harga']);
   }
 
-  Future<void> createOrder(String productName, String productDescription,
-      String price, String deliveryOption) async {
+  Future<void> createOrder(
+      String productName,
+      String productDescription,
+      String price,
+      String deliveryOption,
+      String imageURL,
+      String productIndex) async {
     CollectionReference orderRef =
         FirebaseFirestore.instance.collection('orders');
     await orderRef.add({
       'product_name': productName,
       'price': price,
+      'imageURL': imageURL,
       'address': _address,
       'notes': _notes,
       'delivery_option': deliveryOption,
@@ -46,6 +54,7 @@ class _OrderFormState extends State<OrderForm> {
       'merch_id': widget.uidPedagang,
       'status': 'Menunggu Konfirmasi',
       'timestamp': Timestamp.now(),
+      'productIndex': productIndex,
     });
   }
 
@@ -53,7 +62,7 @@ class _OrderFormState extends State<OrderForm> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Konfirmasi Pesanan'),
+        title: const Text('Konfirmasi Pesanan'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -230,11 +239,12 @@ class _OrderFormState extends State<OrderForm> {
                         if (_formKey.currentState!.validate()) {
                           _formKey.currentState!.save();
                           await createOrder(
-                            widget.menu['nama_produk'],
-                            widget.menu['deskripsi_produk'],
-                            widget.menu['harga'],
-                            _deliveryOption, // Pass the delivery option
-                          );
+                              widget.menu['nama_produk'],
+                              widget.menu['deskripsi_produk'],
+                              _totalPrice.toString(),
+                              _deliveryOption,
+                              widget.menu['imageURL'],
+                              widget.productIndex);
                           Navigator.of(context).pop();
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(

@@ -330,12 +330,13 @@ class _AddMenuPedagangState extends State<AddMenuPedagang> {
             "nama_produk": _namaProductController.text,
             "deskripsi_produk": _detailProductController.text,
             "harga": _hargaController.text,
+            "terjual":0
           });
 
           await ref.doc(user.uid).update({'menu': rute});
           Navigator.pushAndRemoveUntil(
             context,
-            MaterialPageRoute(
+            MaterialPageRoute(   
               builder: (context) => BottomNavBar(),
             ),
             (Route<dynamic> route) =>

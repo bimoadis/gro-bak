@@ -20,7 +20,7 @@ class _RegisterState extends State<Register> {
   final TextEditingController _numberController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _namaUsahaController = TextEditingController();
-  final TextEditingController _nomorTeleponController = TextEditingController();
+  // final TextEditingController _nomorTeleponController = TextEditingController();
 
   bool isSigningUp = false;
   String _role = "Pembeli";
@@ -31,7 +31,7 @@ class _RegisterState extends State<Register> {
     _numberController.dispose();
     _passwordController.dispose();
     _namaUsahaController.dispose();
-    _nomorTeleponController.dispose();
+    // _nomorTeleponController.dispose();
     super.dispose();
   }
 
@@ -160,12 +160,12 @@ class _RegisterState extends State<Register> {
                       isPasswordField: false,
                     ),
                     const SizedBox(height: 10),
-                    FormContainerWidget(
-                      controller: _nomorTeleponController,
-                      hintText: "Nomor Telepon",
-                      isPasswordField: false,
-                    ),
-                    const SizedBox(height: 10),
+                    // FormContainerWidget(
+                    //   controller: _nomorTeleponController,
+                    //   hintText: "Nomor Telepon",
+                    //   isPasswordField: false,
+                    // ),
+                    // const SizedBox(height: 10),
                   ],
                   const SizedBox(height: 20),
                   GestureDetector(
@@ -184,9 +184,9 @@ class _RegisterState extends State<Register> {
                         username: _usernameController.text.isNotEmpty
                             ? _usernameController.text
                             : null,
-                        nomorTelepon: _nomorTeleponController.text.isNotEmpty
-                            ? _nomorTeleponController.text
-                            : null,
+                        // nomorTelepon: _nomorTeleponController.text.isNotEmpty
+                        //     ? _nomorTeleponController.text
+                        //     : null,
                       );
                     },
                     child: Container(
@@ -260,7 +260,7 @@ class _RegisterState extends State<Register> {
     required String role,
     required String? namaUsaha,
     required String? username,
-    required String? nomorTelepon,
+    // required String? nomorTelepon,
   }) async {
     if (_formKey.currentState!.validate()) {
       setState(() {
@@ -292,8 +292,6 @@ class _RegisterState extends State<Register> {
     }
   }
 
-
-
   Future<void> createMerchant(String uid, String? namaUsaha) async {
     DocumentReference merchantDocRef =
         FirebaseFirestore.instance.collection('merchant').doc(uid);
@@ -315,19 +313,20 @@ class _RegisterState extends State<Register> {
       'latitude': '',
       'longitude': '',
       'timestamp': Timestamp.now(),
-      'profileImage': '',
+      'profileImage':
+          'https://firebasestorage.googleapis.com/v0/b/gro-bak.appspot.com/o/swappy-20240626_075440.png?alt=media&token=bdd1ff21-ce3b-4aa5-a53b-a9d66605610e',
     });
   }
 }
 
-  String formatPhoneNumber(String number) {
-    String input = number;
-    if (input.startsWith('0')) {
-      String formatted = '62${input.substring(1)}';
-      print(formatted);
-      return formatted;
-    } else {
-      print(input);
-      return input;
-    }
+String formatPhoneNumber(String number) {
+  String input = number;
+  if (input.startsWith('0')) {
+    String formatted = '62${input.substring(1)}';
+    print(formatted);
+    return formatted;
+  } else {
+    print(input);
+    return input;
   }
+}

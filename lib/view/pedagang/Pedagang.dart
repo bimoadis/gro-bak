@@ -136,7 +136,7 @@ class _PedagangState extends State<Pedagang> {
                           fit: BoxFit.cover,
                         ),
                       ),
-                      SizedBox(width: 10),
+                      const SizedBox(width: 10),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,

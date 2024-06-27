@@ -8,12 +8,16 @@ class ApiService {
       'https://emsifa.github.io/api-wilayah-indonesia/api';
 
   Future<List<Region>> fetchProvinces() async {
-    final response = await http.get(Uri.parse('$baseUrl/provinces.json'));
-    if (response.statusCode == 200) {
-      List jsonResponse = json.decode(response.body);
-      return jsonResponse.map((data) => Region.fromJson(data)).toList();
-    } else {
-      throw Exception('Failed to load provinces');
+    try {
+      final response = await http.get(Uri.parse('$baseUrl/provinces.json'));
+      if (response.statusCode == 200) {
+        List jsonResponse = json.decode(response.body);
+        return jsonResponse.map((data) => Region.fromJson(data)).toList();
+      } else {
+        throw Exception('Failed to load provinces');
+      }
+    } catch (e) {
+      throw Exception('Error: $e');
     }
   }
 

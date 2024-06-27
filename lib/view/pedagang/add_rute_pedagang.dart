@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:geocoding/geocoding.dart';
+import 'package:get/get.dart';
 import 'package:gro_bak/services/adress.dart';
 
 import 'package:gro_bak/repository/getAddress.dart';
@@ -21,9 +22,9 @@ class _AddRutePedagangState extends State<AddRutePedagang> {
   final TextEditingController _startTimeController = TextEditingController();
   final TextEditingController _endTimeController = TextEditingController();
 
-  List<Region> provinces = [];
-  List<Region> regencies = [];
-  List<Region> districts = [];
+  var provinces = <Region>[].obs;
+  var regencies = <Region>[].obs;
+  var districts = <Region>[].obs;
 
   Region? selectedProvince;
   Region? selectedRegency;
@@ -38,160 +39,163 @@ class _AddRutePedagangState extends State<AddRutePedagang> {
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              
-              DropdownButtonFormField<Region>(
-                hint: const Text('Pilih Provinsi'),
-                value: selectedProvince,
-                isExpanded: true,
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                items: provinces.map((Region province) {
-                  return DropdownMenuItem<Region>(
-                    value: province,
-                    child: Text(province.name,
-                        style: const TextStyle(color: Colors.black)),
-                  );
-                }).toList(),
-                onChanged: (Region? newValue) {
-                  setState(() {
-                    selectedProvince = newValue;
-                    if (selectedProvince != null) {
-                      _fetchRegencies(selectedProvince!.id);
-                    }
-                  });
-                },
-                itemHeight: 48.0,
-                dropdownColor: Colors.white,
-              ),
-              SizedBox(height: 16.0),
-              DropdownButtonFormField<Region>(
-                hint: const Text('Pilih Kabupaten/Kota'),
-                value: selectedRegency,
-                isExpanded: true,
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                items: regencies.map((Region regency) {
-                  return DropdownMenuItem<Region>(
-                    value: regency,
-                    child: Text(regency.name,
-                        style: const TextStyle(color: Colors.black)),
-                  );
-                }).toList(),
-                onChanged: (Region? newValue) {
-                  setState(() {
-                    selectedRegency = newValue;
-                    if (selectedRegency != null) {
-                      _fetchDistricts(selectedRegency!.id);
-                    }
-                  });
-                },
-                itemHeight: 48.0,
-                dropdownColor: Colors.white,
-              ),
-              const SizedBox(height: 16.0),
-              DropdownButtonFormField<Region>(
-                hint: const Text('Pilih Kecamatan'),
-                value: selectedDistrict,
-                isExpanded: true,
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                items: districts.map((Region district) {
-                  return DropdownMenuItem<Region>(
-                    value: district,
-                    child: Text(district.name,
-                        style: const TextStyle(color: Colors.black)),
-                  );
-                }).toList(),
-                onChanged: (Region? newValue) {
-                  setState(() {
-                    selectedDistrict = newValue;
-                  });
-                },
-                itemHeight: 48.0,
-                dropdownColor: Colors.white,
-              ),
-              const SizedBox(height: 16.0),
-              TextField(
-                controller: _addressController,
-                decoration: InputDecoration(
-                  hintText: 'Nama Jalan, Gedung, No. Rumah',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16.0),
-              Row(
-                children: [
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.only(right: 8.0),
-                      child: TextField(
-                        controller: _startTimeController,
-                        onTap: () {
-                          _selectStartTime(context);
-                        },
-                        decoration: InputDecoration(
-                          hintText: 'Waktu Mulai',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+            child: Obx(
+              () => (provinces.value.isEmpty)
+                  ? const Center(child: CircularProgressIndicator())
+                  : Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        DropdownButtonFormField<Region>(
+                          hint: const Text('Pilih Provinsi'),
+                          value: selectedProvince,
+                          isExpanded: true,
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          items: provinces.map((Region province) {
+                            return DropdownMenuItem<Region>(
+                              value: province,
+                              child: Text(province.name,
+                                  style: const TextStyle(color: Colors.black)),
+                            );
+                          }).toList(),
+                          onChanged: (Region? newValue) {
+                            setState(() {
+                              selectedProvince = newValue;
+                              if (selectedProvince != null) {
+                                _fetchRegencies(selectedProvince!.id);
+                              }
+                            });
+                          },
+                          itemHeight: 48.0,
+                          dropdownColor: Colors.white,
+                        ),
+                        SizedBox(height: 16.0),
+                        DropdownButtonFormField<Region>(
+                          hint: const Text('Pilih Kabupaten/Kota'),
+                          value: selectedRegency,
+                          isExpanded: true,
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          items: regencies.map((Region regency) {
+                            return DropdownMenuItem<Region>(
+                              value: regency,
+                              child: Text(regency.name,
+                                  style: const TextStyle(color: Colors.black)),
+                            );
+                          }).toList(),
+                          onChanged: (Region? newValue) {
+                            setState(() {
+                              selectedRegency = newValue;
+                              if (selectedRegency != null) {
+                                _fetchDistricts(selectedRegency!.id);
+                              }
+                            });
+                          },
+                          itemHeight: 48.0,
+                          dropdownColor: Colors.white,
+                        ),
+                        const SizedBox(height: 16.0),
+                        DropdownButtonFormField<Region>(
+                          hint: const Text('Pilih Kecamatan'),
+                          value: selectedDistrict,
+                          isExpanded: true,
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          items: districts.map((Region district) {
+                            return DropdownMenuItem<Region>(
+                              value: district,
+                              child: Text(district.name,
+                                  style: const TextStyle(color: Colors.black)),
+                            );
+                          }).toList(),
+                          onChanged: (Region? newValue) {
+                            setState(() {
+                              selectedDistrict = newValue;
+                            });
+                          },
+                          itemHeight: 48.0,
+                          dropdownColor: Colors.white,
+                        ),
+                        const SizedBox(height: 16.0),
+                        TextField(
+                          controller: _addressController,
+                          decoration: InputDecoration(
+                            hintText: 'Nama Jalan, Gedung, No. Rumah',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
                           ),
                         ),
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 8.0),
-                      child: TextField(
-                        controller: _endTimeController,
-                        onTap: () {
-                          _selectEndTime(context);
-                        },
-                        decoration: InputDecoration(
-                          hintText: 'Waktu Selesai',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
+                        const SizedBox(height: 16.0),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Padding(
+                                padding: const EdgeInsets.only(right: 8.0),
+                                child: TextField(
+                                  controller: _startTimeController,
+                                  onTap: () {
+                                    _selectStartTime(context);
+                                  },
+                                  decoration: InputDecoration(
+                                    hintText: 'Waktu Mulai',
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              child: Padding(
+                                padding: const EdgeInsets.only(left: 8.0),
+                                child: TextField(
+                                  controller: _endTimeController,
+                                  onTap: () {
+                                    _selectEndTime(context);
+                                  },
+                                  decoration: InputDecoration(
+                                    hintText: 'Waktu Selesai',
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16.0),
+                        ElevatedButton(
+                          onPressed: _saveAddress,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Color(0xFFFEC901),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8.0),
+                            ),
+                          ),
+                          child: const Text(
+                            'Simpan Alamat',
+                            style: TextStyle(
+                              color: Color(0xFF060100),
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
-                      ),
+                      ],
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16.0),
-              ElevatedButton(
-                onPressed: _saveAddress,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFFFEC901),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8.0),
-                  ),
-                ),
-                child: const Text(
-                  'Simpan Alamat',
-                  style: TextStyle(
-                    color: Color(0xFF060100),
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
+            )),
       ),
     );
   }
@@ -200,6 +204,14 @@ class _AddRutePedagangState extends State<AddRutePedagang> {
   void initState() {
     super.initState();
     _fetchProvinces();
+  }
+
+  @override
+  dispose() {
+    _addressController.dispose();
+    _startTimeController.dispose();
+    _endTimeController.dispose();
+    super.dispose();
   }
 
   Future<void> _selectStartTime(BuildContext context) async {
@@ -230,10 +242,10 @@ class _AddRutePedagangState extends State<AddRutePedagang> {
 
   Future<void> _fetchProvinces() async {
     try {
-      List<Region> provinceList = await apiService.fetchProvinces();
-      setState(() {
-        provinces = provinceList;
-      });
+      provinces.value = await apiService.fetchProvinces();
+      // setState(() {
+      //   provinces = provinceList;
+      // });
     } catch (e) {
       print('Failed to load provinces: $e');
     }
@@ -241,11 +253,11 @@ class _AddRutePedagangState extends State<AddRutePedagang> {
 
   Future<void> _fetchRegencies(String provinceId) async {
     try {
-      List<Region> regencyList = await apiService.fetchRegencies(provinceId);
+      regencies.value = await apiService.fetchRegencies(provinceId);
       setState(() {
-        regencies = regencyList;
+        // regencies = regencyList;
         selectedRegency = null;
-        districts = [];
+        districts.value = [];
         selectedDistrict = null;
       });
     } catch (e) {
@@ -255,11 +267,11 @@ class _AddRutePedagangState extends State<AddRutePedagang> {
 
   Future<void> _fetchDistricts(String regencyId) async {
     try {
-      List<Region> districtList = await apiService.fetchDistricts(regencyId);
-      setState(() {
-        districts = districtList;
-        selectedDistrict = null;
-      });
+      districts.value = await apiService.fetchDistricts(regencyId);
+      // setState(() {
+      // districts = districtList;
+      selectedDistrict = null;
+      // });
     } catch (e) {
       print('Failed to load districts: $e');
     }

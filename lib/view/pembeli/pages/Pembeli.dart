@@ -3,7 +3,6 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:gro_bak/repository/getLongLat.dart';
@@ -37,7 +36,6 @@ class _PembeliState extends State<Pembeli> {
   void initState() {
     super.initState();
     _gps.startPositionStream(_handlePositionStream);
-    setCustomMarkerIcon();
     _addMarkersFromFirestore();
     _messageNotifications.initNotification();
     _getCurrentLocation();
@@ -49,55 +47,54 @@ class _PembeliState extends State<Pembeli> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.orange.shade100.withOpacity(0.05),
-      // Agar initial positionnya berada di posisi user
       body: FutureBuilder(
-          future: _getCurrentLocation(),
-          builder: (context, snapshot) {
-            if (_userPosition != null) {
-              return Container(
-                clipBehavior: Clip.hardEdge,
-                margin: const EdgeInsets.symmetric(horizontal: 10),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Colors.black26,
-                      blurRadius: 15,
-                      offset: Offset(0, 5),
-                    ),
-                  ],
-                ),
-                child: GoogleMap(
-                  initialCameraPosition: CameraPosition(
-                    target: LatLng(
-                        _userPosition!.latitude, _userPosition!.longitude),
-                    zoom: 15,
+        future: _getCurrentLocation(),
+        builder: (context, snapshot) {
+          if (_userPosition != null) {
+            return Container(
+              clipBehavior: Clip.hardEdge,
+              margin: const EdgeInsets.symmetric(horizontal: 10),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Colors.black26,
+                    blurRadius: 15,
+                    offset: Offset(0, 5),
                   ),
-                  markers: Set<Marker>.from(_markers),
-                  onMapCreated: (GoogleMapController controller) {
-                    _controller.complete(controller);
-                  },
-                  myLocationEnabled: true,
-                  zoomControlsEnabled: false,
-                  compassEnabled: true,
-                  myLocationButtonEnabled: true,
-                  mapToolbarEnabled: false,
+                ],
+              ),
+              child: GoogleMap(
+                initialCameraPosition: CameraPosition(
+                  target: LatLng(
+                    _userPosition!.latitude,
+                    _userPosition!.longitude,
+                  ),
+                  zoom: 15,
                 ),
-              );
-            } else {
-              return const Center(
-                child: CircularProgressIndicator(),
-              );
-            }
-          }),
+                markers: _markers,
+                onMapCreated: (GoogleMapController controller) {
+                  _controller.complete(controller);
+                },
+                myLocationEnabled: true,
+                zoomControlsEnabled: false,
+                compassEnabled: true,
+                myLocationButtonEnabled: true,
+                mapToolbarEnabled: false,
+              ),
+            );
+          } else {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+        },
+      ),
     );
   }
 
   void _startSendingNotifications(String vendorName) {
-    // _timer = Timer.periodic(Duration(seconds: 10), (timer) {
     _messageNotifications.sendFCMMessage(vendorName);
-    print(' haloo ini bnjdbfenfceb');
-    // });
   }
 
   void _startPeriodicDataLoad() {
@@ -121,18 +118,16 @@ class _PembeliState extends State<Pembeli> {
       setState(() {
         _userPosition = position;
       });
-      if (_controller.isCompleted) {
-        if (_userPosition != null) {
-          GoogleMapController controller = await _controller.future;
-          controller.animateCamera(
-            CameraUpdate.newCameraPosition(
-              CameraPosition(
-                target: LatLng(position.latitude, position.longitude),
-                zoom: 18,
-              ),
+      if (_controller.isCompleted && _userPosition != null) {
+        GoogleMapController controller = await _controller.future;
+        controller.animateCamera(
+          CameraUpdate.newCameraPosition(
+            CameraPosition(
+              target: LatLng(position.latitude, position.longitude),
+              zoom: 18,
             ),
-          );
-        }
+          ),
+        );
       }
     }
   }
@@ -160,7 +155,8 @@ class _PembeliState extends State<Pembeli> {
     _combinedDataFuture!.then((combinedData) async {
       Set<Marker> markers = <Marker>{};
       for (var data in combinedData) {
-        if (data['latitude'] != '' && data['longitude'] != '') {
+        if (data['latitude'] != null && data['longitude'] != null) {
+          print('data: $data');
           try {
             LatLng position = LatLng(data['latitude'], data['longitude']);
             markers.add(
@@ -169,23 +165,26 @@ class _PembeliState extends State<Pembeli> {
                   title: data['nama_usaha'],
                   snippet: data['nama'],
                 ),
-                markerId: MarkerId(data['email']),
-                // icon: sourceIcon, // Use the custom icon here
+                markerId: MarkerId(position.toString()),
                 icon: await CustomMarker(data: data).toBitmapDescriptor(
                     logicalSize: const Size(150, 50),
                     imageSize: const Size(300, 100)),
                 position: position,
                 onTap: () {
                   _showBottomSheet(
-                      data['profileImage'],
-                      data['nama_usaha'],
-                      data['nama'],
-                      data['rute'],
-                      data['menu'],
-                      data['latitude'],
-                      data['longitude'],
-                      data['uid'],
-                      user!.uid);
+                    data['profileImage'],
+                    data['nama_usaha'],
+                    data['nama'],
+                    data['rute'],
+                    data['menu'],
+                    data['latitude'],
+                    data['longitude'],
+                    data['uid'],
+                    user!.uid,
+                    data['ratings'],
+                    data['rute'],
+                    data['phone_number'],
+                  );
                 },
               ),
             );
@@ -210,12 +209,18 @@ class _PembeliState extends State<Pembeli> {
     double longitude,
     String uidPedagang,
     String uidPembeli,
+    List<Map<String, dynamic>> ratings,
+    List<Map<String, dynamic>> rute,
+    String phone_number,
   ) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       builder: (BuildContext context) {
         return BottomSheetWidget(
+          phone_number: phone_number,
+          rute: rute,
+          ratings: ratings,
           imageURL: imageProfile,
           nameMerchant: nameMerchant,
           name: name,
@@ -230,30 +235,11 @@ class _PembeliState extends State<Pembeli> {
     );
   }
 
-  void setCustomMarkerIcon() async {
-    final ByteData data =
-        await rootBundle.load("assets/images/shopping_cart.png");
-    final ui.Codec codec = await ui.instantiateImageCodec(
-      data.buffer.asUint8List(),
-      targetWidth: 100, // Set a slightly larger width
-      targetHeight: 100, // Set a slightly larger height
-    );
-    final ui.FrameInfo fi = await codec.getNextFrame();
-
-    final ByteData? resizedData =
-        await fi.image.toByteData(format: ui.ImageByteFormat.png);
-    if (resizedData != null) {
-      final Uint8List resizedBytes = resizedData.buffer.asUint8List();
-      setState(() {
-        sourceIcon = BitmapDescriptor.fromBytes(resizedBytes);
-      });
-    }
-  }
-
   Future<void> _getCurrentLocation() async {
     try {
       Position position = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.best);
+        desiredAccuracy: LocationAccuracy.best,
+      );
       setState(() {
         _userPosition = position;
       });
@@ -266,8 +252,6 @@ class _PembeliState extends State<Pembeli> {
     if (_userPosition == null) return;
 
     final double thresholdDistance = 100.0;
-
-    // Get the current user
 
     try {
       List<Map<String, dynamic>> merchantData = await readMerchantData();
@@ -286,7 +270,7 @@ class _PembeliState extends State<Pembeli> {
 
         if (distance <= thresholdDistance) {
           _startSendingNotifications(vendorName);
-          break; // Send notification for the first nearby vendor found
+          break;
         }
       }
     } catch (e) {
@@ -317,12 +301,14 @@ class CustomMarker extends StatelessWidget {
         SizedBox(
           width: 100,
           child: Text(
-            '${data['nama_usaha']}',
+            data['nama_usaha'],
             maxLines: 2,
             style: const TextStyle(
-                color: Colors.black, overflow: TextOverflow.ellipsis),
+              color: Colors.black,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
-        )
+        ),
       ],
     );
   }

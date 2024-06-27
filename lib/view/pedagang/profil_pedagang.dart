@@ -109,10 +109,10 @@ class _ProfilePageState extends State<ProfilePage> {
     final userMap = userData?.data() as Map<String, dynamic>? ?? {};
     final merchantMap = merchantData?.data() as Map<String, dynamic>? ?? {};
 
-    final email = userMap['email'] ?? 'Unknown';
+    final nama = userMap['nama'] ?? 'Unknown';
     final role = userMap['role'] ?? 'Unknown';
     final namaUsaha = merchantMap['nama_usaha'] ?? 'Unknown';
-    final nomorTelepon = merchantMap['nomor_telepon'] ?? 'Unknown';
+    final nomorTelepon = userMap['phone_number'] ?? 'Unknown';
 
     return Scaffold(
       appBar: AppBar(
@@ -225,7 +225,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                   const SizedBox(height: 20),
                   Text(
-                    email,
+                    nama,
                     style: const TextStyle(
                       fontSize: 18,
                     ),
@@ -375,5 +375,5 @@ class _ProfilePageState extends State<ProfilePage> {
         // 'latitude': userData!['latitude'],
         // 'nama': userData!['nama'],
         // 'role': userData!['role'],
-        // 'email': userData!['email'],
+        // 'nama': userData!['email'],
         // 'profileImage': downloadURL.value,

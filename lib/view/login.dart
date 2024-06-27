@@ -39,7 +39,6 @@ class _LoginPageState extends State<LoginPage> {
       } else {
         _numberError = null;
       }
-
       if (_passwordController.text.isEmpty) {
         _passwordError = "Please enter your password";
       } else if (_passwordController.text.length < 6) {

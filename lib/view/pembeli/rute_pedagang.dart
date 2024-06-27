@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
+import 'package:gro_bak/repository/getLongLat.dart';
 import 'package:gro_bak/view/pembeli/list_menu_pembeli.dart';
 
 class RutePedagang extends StatefulWidget {
@@ -17,14 +18,13 @@ class RutePedagang extends StatefulWidget {
   final String uidPembeli;
 
   const RutePedagang(
-      {Key? key,
+      {super.key,
       required this.menu,
       required this.seluruhRute,
       required this.namaUsaha,
       required this.namaPemilik,
       required this.uidPedagang,
-      required this.uidPembeli})
-      : super(key: key);
+      required this.uidPembeli});
 
   @override
   State<RutePedagang> createState() => _RutePedagangState();
@@ -40,6 +40,8 @@ class _RutePedagangState extends State<RutePedagang> {
   // Ikon kustom
   BitmapDescriptor? shoppingCartIcon;
   BitmapDescriptor? martIcon;
+
+  Future<List<Map<String, dynamic>>>? _combinedDataFuture;
 
   @override
   void initState() {
@@ -155,7 +157,7 @@ class _RutePedagangState extends State<RutePedagang> {
                       target: LatLng(latitude, longitude),
                       zoom: 15,
                     ),
-                    markers: Set<Marker>.from(_markers),
+                    markers: _markers,
                     polylines: Set<Polyline>.of(_polylines),
                     onMapCreated: (GoogleMapController controller) {
                       _controller.complete(controller);
@@ -308,15 +310,15 @@ class _RutePedagangState extends State<RutePedagang> {
               Row(
                 children: [
                   Card(
-                    child: Container(
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(8.0),
-                        child: Image.network(
-                          _merchantData!['profileImage'],
-                          width: 120,
-                          height: 90,
-                          fit: BoxFit.cover,
-                        ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(8.0),
+                      child: Image.network(
+                        _merchantData != null
+                            ? _merchantData!['profileImage']
+                            : 'https://img.freepik.com/free-vector/flat-design-no-data-illustration_23-2150527124.jpg?t=st=1719357109~exp=1719360709~hmac=bca40b331e0742e25eec8f78e04c02dba49502f3062543034629490f33988b08&w=826',
+                        width: 120,
+                        height: 90,
+                        fit: BoxFit.cover,
                       ),
                     ),
                   ),
@@ -343,52 +345,6 @@ class _RutePedagangState extends State<RutePedagang> {
                             widget.namaUsaha,
                             style: TextStyle(
                               fontSize: 14,
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Row(
-                              children: [
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.pushReplacement(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => ListMenuPesanan(
-                                          menu: widget.menu,
-                                          uidPedagang: widget.uidPedagang,
-                                          uidPembeli: widget.uidPembeli,
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                  style: TextButton.styleFrom(
-                                    backgroundColor: Color(0xFFFEC901),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(16.0),
-                                    ),
-                                    padding:
-                                        EdgeInsets.zero, // Removing all padding
-                                    minimumSize:
-                                        Size(50, 30), // Set a minimum size
-                                    tapTargetSize: MaterialTapTargetSize
-                                        .shrinkWrap, // Shrink wrap the tap target size
-                                  ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 18.0,
-                                        vertical:
-                                            4.0), // Add padding inside the child
-                                    child: Text(
-                                      'Menu',
-                                      style: TextStyle(
-                                        color: Color(0xFF060100),
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
                             ),
                           ),
                         ],

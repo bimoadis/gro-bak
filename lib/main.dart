@@ -10,9 +10,27 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'view/login.dart';
 import 'package:gro_bak/services/gps.dart';
 
+// Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+//   // await Firebase.initializeApp();
+//   print("Handling a background message: ${message.messageId}");
+// }
+
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
+
+  // Log the message details
   print("Handling a background message: ${message.messageId}");
+
+  if (message.notification != null) {
+    print("Title: ${message.notification!.title}");
+    print("Body: ${message.notification!.body}");
+  }
+
+  // Handle data message
+  if (message.data.isNotEmpty) {
+    print("Data: ${message.data}");
+    // Handle data message. For example, you can save the data to local storage, show a local notification, etc.
+  }
 }
 
 void main() async {
@@ -57,7 +75,8 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primaryColor: Colors.blue[900],
+        useMaterial3: true,
+        // primaryColor: Colors.blue[900],
       ),
       home: home,
     );
