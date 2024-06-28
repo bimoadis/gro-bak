@@ -299,7 +299,9 @@ class _RegisterState extends State<Register> {
       'nama_usaha': namaUsaha ?? '',
       'rute': [],
       'menu': [],
-      'status': 'tutup',
+      'ratings': [],
+      'average_rating': 0,
+      'buka': false,
     });
   }
 

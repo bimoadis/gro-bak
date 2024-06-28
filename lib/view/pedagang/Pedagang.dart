@@ -26,6 +26,7 @@ class _PedagangState extends State<Pedagang> {
   late StreamSubscription<List<DocumentSnapshot>> _ordersSubscription;
   List<DocumentSnapshot> _menungguKonfirmasiOrders = [];
   List<DocumentSnapshot> _dikonfirmasiOrders = [];
+  bool merchantStatus = false;
 
   void _handlePositionStream(Position position) {
     setState(() {
@@ -52,7 +53,22 @@ class _PedagangState extends State<Pedagang> {
             .toList();
       });
     });
+    getMerchantStatus();
     startTimer();
+  }
+
+  getMerchantStatus() async {
+    var merchant = await FirebaseFirestore.instance
+        .collection('merchant')
+        .doc(_auth.currentUser?.uid)
+        .get()
+        .then(
+      (value) {
+        setState(() {
+          merchantStatus = value['buka'];
+        });
+      },
+    );
   }
 
   changeMerchantStatus(bool buka) async {
@@ -100,14 +116,18 @@ class _PedagangState extends State<Pedagang> {
               activeFgColor: Colors.white,
               inactiveBgColor: Colors.grey,
               inactiveFgColor: Colors.white,
-              initialLabelIndex: 1,
+              initialLabelIndex: (merchantStatus) ? 0 : 1,
               totalSwitches: 2,
               labels: ['Buka', 'Tutup'],
               radiusStyle: true,
               onToggle: (index) {
+                print('merchant status: $merchantStatus');
                 print('switched to: $index');
                 print('switched to: ${index == 0}');
-                changeMerchantStatus(index == 0);
+                setState(() {
+                  changeMerchantStatus(index == 0);
+                  merchantStatus = index == 0;
+                });
               },
             ),
             IconButton(
