@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:gro_bak/view/pembeli/list_menu_pembeli.dart';
 import 'package:gro_bak/view/pembeli/rute_pedagang.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -16,9 +17,11 @@ class BottomSheetWidget extends StatelessWidget {
   final List<Map<String, dynamic>> rute;
   final List<Map<String, dynamic>>? ratings;
   final String phone_number;
+  final Position currentUserPosition;
 
   const BottomSheetWidget({
     super.key,
+    required this.currentUserPosition,
     required this.phone_number,
     required this.rute,
     required this.ratings,
@@ -159,6 +162,9 @@ class BottomSheetWidget extends StatelessWidget {
                                       context,
                                       MaterialPageRoute(
                                         builder: (context) => ListMenuPesanan(
+                                          currentUserPosition: currentUserPosition,
+                                          latitude: latitude,
+                                          longitude: longitude,
                                           ratings: ratings,
                                           menu: menu,
                                           uidPedagang: uidPedagang,

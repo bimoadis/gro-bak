@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -56,7 +57,6 @@ class _OrdersPageState extends State<OrdersPage> {
           .update({
         'menu': menu,
       });
-
       print('Data terjual berhasil diperbarui.');
     } else {
       print('Dokumen tidak ditemukan.');
@@ -97,6 +97,40 @@ class _OrdersPageState extends State<OrdersPage> {
                           String formattedDate = DateFormat('d MMMM yyyy')
                               .format(order['timestamp'].toDate());
                           return OrderItem(
+                            onBatal: () {
+                              showDialog(
+                                context: context,
+                                builder: (context) {
+                                  return AlertDialog(
+                                    title: const Text('Konfirmasi'),
+                                    content: const Text(
+                                        'Apakah Anda yakin ingin membatalkan pesanan ini?'),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () {
+                                          updateOrderStatus(
+                                              order.id, 'Dibatalkan');
+                                          Navigator.pop(context);
+                                        },
+                                        child: const Text(
+                                          'Ya',
+                                          style: TextStyle(color: Colors.green),
+                                        ),
+                                      ),
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.pop(context);
+                                        },
+                                        child: const Text(
+                                          'Tidak',
+                                          style: TextStyle(color: Colors.red),
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            },
                             order: order,
                             formattedDate: formattedDate,
                             status: 'Menunggu Konfirmasi',
@@ -163,6 +197,7 @@ class _OrdersPageState extends State<OrdersPage> {
 class OrderItem extends StatelessWidget {
   const OrderItem({
     super.key,
+    this.onBatal,
     required this.order,
     required this.formattedDate,
     required this.status,
@@ -173,6 +208,7 @@ class OrderItem extends StatelessWidget {
   final String formattedDate;
   final String status;
   final void Function()? changeToSuccess;
+  final void Function()? onBatal;
 
   @override
   Widget build(BuildContext context) {
@@ -253,13 +289,26 @@ class OrderItem extends StatelessWidget {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Text(
-                      status,
-                      style: TextStyle(
-                        color: Colors.yellow.shade700,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                    // Text(
+                    //   status,
+                    //   style: TextStyle(
+                    //     color: Colors.yellow.shade700,
+                    //     fontWeight: FontWeight.bold,
+                    //   ),
+                    // ),
+
+                    ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          elevation: 0,
+                          textStyle:
+                              const TextStyle(fontWeight: FontWeight.bold),
+                          backgroundColor: Colors.red.shade100.withOpacity(0.5),
+                        ),
+                        onPressed: onBatal,
+                        child: const Text(
+                          'Batal',
+                          style: TextStyle(color: Colors.red),
+                        ))
                   ],
                 ),
               if (status == 'Dikonfirmasi')
@@ -402,7 +451,6 @@ class _RatingDialogState extends State<RatingDialog> {
                       'produkIndex': widget.productIndex,
                       'rating': _rating,
                     });
-
                     // updateRating(widget.merchId, _ratings);
                     Navigator.pop(context);
                   },

@@ -2,17 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:gro_bak/view/pembeli/pesanan_pembeli.dart';
 
 class ListMenuPesanan extends StatefulWidget {
   final List<dynamic> menu;
   final String uidPedagang;
   final String uidPembeli;
-  // final List<Map<String, dynamic>>? combinedDataFuture;
   final List<Map<String, dynamic>>? ratings;
+  final double? latitude;
+  final double? longitude;
+  final Position? currentUserPosition;
 
   const ListMenuPesanan({
     Key? key,
+    required this.currentUserPosition,
+    required this.latitude,
+    required this.longitude,
     required this.menu,
     required this.uidPedagang,
     required this.uidPembeli,
@@ -27,11 +33,11 @@ class _ListMenuPesananState extends State<ListMenuPesanan> {
   final _auth = FirebaseAuth.instance;
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
   List<dynamic> menuList = [];
+  Position? _currentUserPosition;
 
   @override
   void initState() {
     super.initState();
-    // Ambil menu dari properti menu yang dilewatkan
     menuList = widget.menu;
   }
 
@@ -42,10 +48,9 @@ class _ListMenuPesananState extends State<ListMenuPesanan> {
     widget.ratings?.forEach((data) {
       if (data['produkIndex'] == menuIndex.toString()) {
         print('ratings : ${data['rating']}');
-        ratings.add(data['rating']);
+        ratings.add(double.parse(data['rating'].toString()));
       }
     });
-
     print('to List : ${ratings.toList()}');
     // Hitung rata-rata
     if (ratings.isNotEmpty) {
@@ -56,8 +61,21 @@ class _ListMenuPesananState extends State<ListMenuPesanan> {
     }
   }
 
+  double calculateDistance(double startLatitude, double startLongitude,
+      double endLatitude, double endLongitude) {
+    double distanceInMeters = Geolocator.distanceBetween(
+        startLatitude, startLongitude, endLatitude, endLongitude);
+    return distanceInMeters / 1000; // convert to kilometers
+  }
+
   @override
   Widget build(BuildContext context) {
+    var distance = calculateDistance(
+        widget.currentUserPosition!.latitude,
+        widget.currentUserPosition!.longitude,
+        widget.latitude!,
+        widget.longitude!);
+    // var distance = 2;
     return Scaffold(
       appBar: AppBar(
         title: const Text('List Menu'),
@@ -75,17 +93,26 @@ class _ListMenuPesananState extends State<ListMenuPesanan> {
 
                   return GestureDetector(
                     onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => OrderForm(
-                            productIndex: menuIndex.toString(),
-                            menu: menu,
-                            uidPedagang: widget.uidPedagang,
-                            uidPembeli: widget.uidPembeli,
+                      if (distance <= 0.35) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => OrderForm(
+                              productIndex: menuIndex.toString(),
+                              menu: menu,
+                              uidPedagang: widget.uidPedagang,
+                              uidPembeli: widget.uidPembeli,
+                            ),
                           ),
-                        ),
-                      );
+                        );
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content:
+                                Text('Anda berada di luar jangkauan pedagang'),
+                          ),
+                        );
+                      }
                     },
                     child: Container(
                       margin: const EdgeInsets.symmetric(vertical: 8.0),

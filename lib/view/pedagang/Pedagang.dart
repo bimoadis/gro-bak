@@ -8,6 +8,7 @@ import 'package:gro_bak/services/logout.dart';
 import 'package:gro_bak/repository/getOrders.dart';
 import 'package:gro_bak/view/widget/bottom_bar.dart';
 import 'package:gro_bak/view/login.dart';
+import 'package:toggle_switch/toggle_switch.dart';
 
 class Pedagang extends StatefulWidget {
   const Pedagang({Key? key}) : super(key: key);
@@ -54,6 +55,13 @@ class _PedagangState extends State<Pedagang> {
     startTimer();
   }
 
+  changeMerchantStatus(bool buka) async {
+    await FirebaseFirestore.instance
+        .collection('merchant')
+        .doc(_auth.currentUser?.uid)
+        .update({'buka': buka});
+  }
+
   @override
   void dispose() {
     _ordersSubscription.cancel();
@@ -82,16 +90,36 @@ class _PedagangState extends State<Pedagang> {
             ),
           ),
           actions: [
+            ToggleSwitch(
+              minWidth: 60.0,
+              cornerRadius: 20.0,
+              activeBgColors: [
+                [Colors.green[800]!],
+                [Colors.red[800]!]
+              ],
+              activeFgColor: Colors.white,
+              inactiveBgColor: Colors.grey,
+              inactiveFgColor: Colors.white,
+              initialLabelIndex: 1,
+              totalSwitches: 2,
+              labels: ['Buka', 'Tutup'],
+              radiusStyle: true,
+              onToggle: (index) {
+                print('switched to: $index');
+                print('switched to: ${index == 0}');
+                changeMerchantStatus(index == 0);
+              },
+            ),
             IconButton(
               onPressed: () {
                 AuthService.logout(context);
               },
-              icon: Icon(
+              icon: const Icon(
                 Icons.logout,
               ),
             ),
           ],
-          bottom: TabBar(
+          bottom: const TabBar(
             tabs: [
               Tab(text: "Pesanan Masuk"),
               Tab(text: "Dikonfirmasi"),
@@ -110,7 +138,7 @@ class _PedagangState extends State<Pedagang> {
 
   Widget _buildOrderList(List<DocumentSnapshot> orders, String status) {
     if (orders.isEmpty) {
-      return Center(child: Text('No orders found'));
+      return const Center(child: Text('No orders found'));
     }
     return Padding(
       padding: const EdgeInsets.all(20.0),

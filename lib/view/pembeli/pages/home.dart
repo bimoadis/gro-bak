@@ -65,6 +65,7 @@ class _HomeState extends State<Home> {
       isScrollControlled: true,
       builder: (BuildContext context) {
         return BottomSheetWidget(
+          currentUserPosition: _currentUserPosition!,
           phone_number: phone_number,
           rute: rute,
           ratings: ratings,

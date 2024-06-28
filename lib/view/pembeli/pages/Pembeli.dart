@@ -168,7 +168,7 @@ class _PembeliState extends State<Pembeli> {
                 markerId: MarkerId(position.toString()),
                 icon: await CustomMarker(data: data).toBitmapDescriptor(
                     logicalSize: const Size(150, 50),
-                    imageSize: const Size(300, 100)),
+                    imageSize: const Size(400, 200)),
                 position: position,
                 onTap: () {
                   _showBottomSheet(
@@ -181,8 +181,8 @@ class _PembeliState extends State<Pembeli> {
                     data['longitude'],
                     data['uid'],
                     user!.uid,
-                    data['ratings'],
-                    data['rute'],
+                    data['ratings'].cast<Map<String, dynamic>>(),
+                    data['rute'].cast<Map<String, dynamic>>(),
                     data['phone_number'],
                   );
                 },
@@ -218,6 +218,7 @@ class _PembeliState extends State<Pembeli> {
       isScrollControlled: true,
       builder: (BuildContext context) {
         return BottomSheetWidget(
+          currentUserPosition: _userPosition!,
           phone_number: phone_number,
           rute: rute,
           ratings: ratings,
@@ -289,17 +290,18 @@ class CustomMarker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Icon(
           Icons.shopping_cart,
           color: Colors.orange.shade800,
         ),
         const SizedBox(
-          width: 5,
+          height: 2,
         ),
         SizedBox(
-          width: 100,
+          width: 200,
           child: Text(
             data['nama_usaha'],
             maxLines: 2,

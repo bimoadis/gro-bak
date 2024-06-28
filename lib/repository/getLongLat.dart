@@ -5,17 +5,17 @@ Future<List<Map<String, dynamic>>> readMerchantData() async {
 
   try {
     // Membaca data dari tabel 'users'
-    QuerySnapshot usersQuery =
-        await FirebaseFirestore.instance.collection('users').get();
+    QuerySnapshot usersQuery = await FirebaseFirestore.instance
+        .collection("merchant")
+        .where("status", isEqualTo: 'buka')
+        .get();
     List<DocumentSnapshot> usersDocs = usersQuery.docs;
 
-    // Mengambil data dari setiap dokumen pada tabel 'users'
     for (var userDoc in usersDocs) {
       Map<String, dynamic> userData = userDoc.data() as Map<String, dynamic>;
       String uid = userDoc.id;
       String role = userData['role'];
 
-      // Jika peran pengguna adalah "Pedagang", baca data pedagang dari tabel 'merchant'
       if (role == 'Pedagang') {
         DocumentSnapshot merchantDoc = await FirebaseFirestore.instance
             .collection('merchant')
@@ -24,11 +24,8 @@ Future<List<Map<String, dynamic>>> readMerchantData() async {
         if (merchantDoc.exists) {
           Map<String, dynamic> merchantData =
               merchantDoc.data() as Map<String, dynamic>;
-          // Menambahkan uid ke dalam data pedagang
           merchantData['uid'] = uid;
-          // Menggabungkan data pedagang dengan data pengguna
           userData.addAll(merchantData);
-          // Menambahkan data pengguna (dan jika ada, data pedagang) ke dalam daftar gabungan
           combinedData.add(userData);
         }
       }
