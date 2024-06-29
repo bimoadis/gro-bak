@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:gro_bak/view/pedagang/LocationController.dart';
 import 'package:gro_bak/view/pembeli/pages/location_pick_controller.dart';
+import 'package:intl/intl.dart';
 
 class DetailPesanan extends StatefulWidget {
   const DetailPesanan({super.key, required this.order});
@@ -168,7 +169,11 @@ class _DetailPesananState extends State<DetailPesanan> {
                                     style: TextStyle(color: Colors.grey[600]),
                                   ),
                                   Text(
-                                    'Harga: ${widget.order['price']}',
+                                    NumberFormat.currency(
+                                            locale: 'id',
+                                            symbol: 'Rp ',
+                                            decimalDigits: 0)
+                                        .format(widget.order['price']),
                                     style: TextStyle(color: Colors.grey[600]),
                                   ),
                                 ],

@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:gro_bak/view/pembeli/pages/locationPick.dart';
 import 'package:gro_bak/view/pembeli/pages/location_pick_controller.dart';
+import 'package:intl/intl.dart';
 
 class OrderForm extends StatefulWidget {
   final Map<String, dynamic> menu;
@@ -32,7 +33,7 @@ class _OrderFormState extends State<OrderForm> {
   String? _namaPembeli;
   String _deliveryOption = 'Jemput';
   int _quantity = 1; // Jumlah awal item
-  late int _totalPrice;
+  late num _totalPrice;
   LocationPickController locationPickController =
       Get.put(LocationPickController());
 
@@ -40,7 +41,7 @@ class _OrderFormState extends State<OrderForm> {
   void initState() {
     super.initState();
     // Set total harga awal
-    _totalPrice = int.parse(widget.menu['harga']);
+    _totalPrice = widget.menu['harga'];
     locationPickController.getCurrentLocation();
   }
 
@@ -51,7 +52,7 @@ class _OrderFormState extends State<OrderForm> {
       String namaPembeli,
       String productName,
       String productDescription,
-      String price,
+      num price,
       String deliveryOption,
       String imageURL,
       String productIndex) async {
@@ -130,7 +131,11 @@ class _OrderFormState extends State<OrderForm> {
                               ),
                               const SizedBox(height: 4.0),
                               Text(
-                                'Harga: Rp.${widget.menu['harga']}',
+                                NumberFormat.currency(
+                                        locale: 'id',
+                                        symbol: 'Rp ',
+                                        decimalDigits: 0)
+                                    .format(widget.menu['harga']),
                                 style: TextStyle(
                                   color: Colors.grey[600],
                                 ),
@@ -143,8 +148,7 @@ class _OrderFormState extends State<OrderForm> {
                                       setState(() {
                                         if (_quantity > 1) {
                                           _quantity--;
-                                          _totalPrice -=
-                                              int.parse(widget.menu['harga']);
+                                          _totalPrice -= widget.menu['harga'];
                                         }
                                       });
                                     },
@@ -157,8 +161,8 @@ class _OrderFormState extends State<OrderForm> {
                                     onPressed: () {
                                       setState(() {
                                         _quantity++;
-                                        _totalPrice += int.parse(widget
-                                            .menu['harga']); // Tambah harga
+                                        _totalPrice += widget
+                                            .menu['harga']; // Tambah harga
                                       });
                                     },
                                     icon: const Icon(Icons.add),
@@ -197,7 +201,12 @@ class _OrderFormState extends State<OrderForm> {
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
                               Text(
-                                'Rp. $_totalPrice', // Tampilkan total harga
+                                NumberFormat.currency(
+                                        locale: 'id',
+                                        symbol: 'Rp ',
+                                        decimalDigits: 0)
+                                    .format(
+                                        _totalPrice), // Tampilkan total harga
                                 style: TextStyle(
                                   color: Colors.green[500],
                                   fontWeight: FontWeight.bold,
@@ -222,10 +231,6 @@ class _OrderFormState extends State<OrderForm> {
                       ),
                       const SizedBox(height: 16),
                       Obx(() {
-                        print(
-                            '${locationPickController.selectedPosition.value.latitude}');
-                        print(
-                            '${locationPickController.selectedPosition.value.longitude}');
                         return Column(
                           children: [
                             SizedBox(
@@ -239,12 +244,15 @@ class _OrderFormState extends State<OrderForm> {
                                   ),
                                 },
                                 myLocationEnabled: true,
+                                zoomGesturesEnabled: false,
+                                zoomControlsEnabled: false,
+                                scrollGesturesEnabled: false,
                                 onMapCreated:
                                     locationPickController.onMapCreated,
                                 initialCameraPosition: CameraPosition(
                                   target: locationPickController
                                       .selectedPosition.value,
-                                  zoom: 15,
+                                  zoom: 18,
                                 ),
                                 onTap: (argument) => Navigator.push(
                                   context,
@@ -320,7 +328,7 @@ class _OrderFormState extends State<OrderForm> {
                               _namaPembeli ?? 'null',
                               widget.menu['nama_produk'],
                               widget.menu['deskripsi_produk'],
-                              _totalPrice.toString(),
+                              _totalPrice,
                               _deliveryOption,
                               widget.menu['imageURL'],
                               widget.productIndex);

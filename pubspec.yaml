@@ -30,7 +30,6 @@ environment:
 dependencies:
   cloud_firestore: ^4.15.9
   cupertino_icons: ^1.0.6
-  currency_formatter: ^2.2.1
   firebase_analytics: ^10.2.0
   firebase_auth: ^4.17.9
   firebase_core: ^2.27.1
@@ -40,8 +39,8 @@ dependencies:
     sdk: flutter
   flutter_background_service: ^5.0.5
   flutter_image_compress: ^2.3.0
-  flutter_lazy_indexed_stack: ^0.0.6
   flutter_map: ^6.1.0
+  flutter_multi_formatter: ^2.12.8
   flutter_polyline_points: ^2.0.0
   flutter_rating_bar: ^4.0.1
   flutter_svg: ^2.0.10+1

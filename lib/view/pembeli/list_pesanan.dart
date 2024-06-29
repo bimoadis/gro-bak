@@ -17,6 +17,7 @@ class _OrdersPageState extends State<OrdersPage> {
     return FirebaseFirestore.instance
         .collection('orders')
         .where('status', isEqualTo: 'Menunggu Konfirmasi')
+        .where('user_id', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
         .snapshots()
         .map((snapshot) => snapshot.docs);
   }
@@ -25,6 +26,7 @@ class _OrdersPageState extends State<OrdersPage> {
     return FirebaseFirestore.instance
         .collection('orders')
         .where('status', isEqualTo: 'Dikonfirmasi')
+        .where('user_id', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
         .snapshots()
         .map((snapshot) => snapshot.docs);
   }
@@ -98,6 +100,41 @@ class _OrdersPageState extends State<OrdersPage> {
                               .format(order['timestamp'].toDate());
                           return OrderItem(
                             order: order,
+                            onBatal: () {
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    title: const Text('Konfirmasi Pembatalan'),
+                                    content: const Text(
+                                        'Apakah Anda yakin ingin membatalkan pesanan?'),
+                                    actions: <Widget>[
+                                      TextButton(
+                                        onPressed: () {
+                                          // Tutup dialog dan lakukan sesuatu jika "Tidak" dipilih
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: const Text(
+                                          'Tidak',
+                                          style: TextStyle(color: Colors.green),
+                                        ),
+                                      ),
+                                      TextButton(
+                                        onPressed: () {
+                                          updateOrderStatus(
+                                              order.id, 'Dibatalkan');
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: const Text(
+                                          'Ya',
+                                          style: TextStyle(color: Colors.red),
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            },
                             formattedDate: formattedDate,
                             status: 'Menunggu Konfirmasi',
                           );
@@ -161,18 +198,19 @@ class _OrdersPageState extends State<OrdersPage> {
 }
 
 class OrderItem extends StatelessWidget {
-  const OrderItem({
-    super.key,
-    required this.order,
-    required this.formattedDate,
-    required this.status,
-    this.changeToSuccess,
-  });
+  const OrderItem(
+      {super.key,
+      required this.order,
+      required this.formattedDate,
+      required this.status,
+      this.changeToSuccess,
+      this.onBatal});
 
   final DocumentSnapshot<Object?> order;
   final String formattedDate;
   final String status;
   final void Function()? changeToSuccess;
+  final void Function()? onBatal;
 
   @override
   Widget build(BuildContext context) {
@@ -241,7 +279,9 @@ class OrderItem extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Rp. ${order['price']}',
+                    NumberFormat.currency(
+                            locale: 'id', symbol: 'Rp ', decimalDigits: 0)
+                        .format(order['price']),
                     style: const TextStyle(
                       fontSize: 18.0,
                       fontWeight: FontWeight.bold,
@@ -250,17 +290,19 @@ class OrderItem extends StatelessWidget {
                 ],
               ),
               if (status == 'Menunggu Konfirmasi')
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      status,
-                      style: TextStyle(
-                        color: Colors.yellow.shade700,
-                        fontWeight: FontWeight.bold,
-                      ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    elevation: 0,
+                    textStyle: const TextStyle(fontWeight: FontWeight.bold),
+                    backgroundColor: Colors.red.shade100.withOpacity(0.5),
+                  ),
+                  onPressed: onBatal,
+                  child: Text(
+                    "Batalkan",
+                    style: TextStyle(
+                      color: Colors.red.shade900,
                     ),
-                  ],
+                  ),
                 ),
               if (status == 'Dikonfirmasi')
                 Column(

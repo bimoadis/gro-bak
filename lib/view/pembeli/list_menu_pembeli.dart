@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:gro_bak/view/pembeli/pesanan_pembeli.dart';
+import 'package:intl/intl.dart';
 
 class ListMenuPesanan extends StatefulWidget {
   final List<dynamic> menu;
@@ -129,7 +130,11 @@ class _ListMenuPesananState extends State<ListMenuPesanan> {
                                     ),
                                     const SizedBox(height: 4.0),
                                     Text(
-                                      'Harga: ${menu['harga']}',
+                                      NumberFormat.currency(
+                                      locale: 'id',
+                                      symbol: 'Rp ',
+                                      decimalDigits: 0)
+                                  .format(menu['harga']),
                                       style: TextStyle(color: Colors.grey[600]),
                                     ),
                                     const SizedBox(height: 10),

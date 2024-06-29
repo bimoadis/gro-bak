@@ -4,11 +4,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:get/get.dart';
+import 'package:gro_bak/view/pedagang/currency.dart';
 import 'package:gro_bak/view/widget/bottom_bar.dart';
 import 'package:image_picker/image_picker.dart';
-
 
 class AddMenuPedagang extends StatefulWidget {
   const AddMenuPedagang({super.key});
@@ -23,7 +24,19 @@ class _AddMenuPedagangState extends State<AddMenuPedagang> {
   final TextEditingController _namaProductController = TextEditingController();
   final TextEditingController _detailProductController =
       TextEditingController();
-  final TextEditingController _hargaController = TextEditingController();
+  TextEditingController _hargaController = TextEditingController();
+
+  // void _removeDots(String text = '') {
+  //   String newText = text.replaceAll(',', '');
+  //   // if (text != newText) {
+  //   //   _hargaController.value = TextEditingValue(
+  //   //     text: newText,
+  //   //     selection: TextSelection.fromPosition(
+  //   //       TextPosition(offset: newText.length),
+  //   //     ),
+  //   //   );
+  //   // }
+  // }
 
   final ImagePicker _picker = ImagePicker();
   Rx<XFile?> _imageFile = Rx<XFile?>(null);
@@ -127,6 +140,11 @@ class _AddMenuPedagangState extends State<AddMenuPedagang> {
     print(file.lengthSync());
 
     return File(result!.path);
+  }
+
+  @override
+  void initState() {
+    super.initState();
   }
 
   @override
@@ -265,6 +283,14 @@ class _AddMenuPedagangState extends State<AddMenuPedagang> {
               ),
               const SizedBox(height: 16),
               TextField(
+                keyboardType: TextInputType.number,
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                  CurrencyFormat()
+                ],
+                onChanged: (value) {
+                  print(_hargaController.text.replaceAll(',', ''));
+                },
                 controller: _hargaController,
                 decoration: InputDecoration(
                   hintText: 'Harga',
@@ -329,14 +355,14 @@ class _AddMenuPedagangState extends State<AddMenuPedagang> {
             "imageURL": downloadURL.value,
             "nama_produk": _namaProductController.text,
             "deskripsi_produk": _detailProductController.text,
-            "harga": _hargaController.text,
-            "terjual":0
+            "harga": int.parse(_hargaController.text.replaceAll(',', '')),
+            "terjual": 0
           });
 
           await ref.doc(user.uid).update({'menu': rute});
           Navigator.pushAndRemoveUntil(
             context,
-            MaterialPageRoute(   
+            MaterialPageRoute(
               builder: (context) => BottomNavBar(),
             ),
             (Route<dynamic> route) =>

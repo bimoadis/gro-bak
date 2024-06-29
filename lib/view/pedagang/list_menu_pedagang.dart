@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:gro_bak/view/pedagang/add_menu_pedagang.dart';
+import 'package:intl/intl.dart';
 
 class ListMenuPage extends StatefulWidget {
   @override
@@ -100,10 +101,14 @@ class _ListMenuPageState extends State<ListMenuPage> {
                                     style: TextStyle(color: Colors.grey[600]),
                                   ),
                                   Text(
-                                    'Harga: ${menu['harga']}',
+                                    NumberFormat.currency(
+                                            locale: 'id',
+                                            symbol: 'Rp ',
+                                            decimalDigits: 0)
+                                        .format(menu['harga']),
                                     style: TextStyle(color: Colors.grey[600]),
                                   ),
-                                  SizedBox(height: 10),
+                                  const SizedBox(height: 10),
                                 ],
                               ),
                             ),

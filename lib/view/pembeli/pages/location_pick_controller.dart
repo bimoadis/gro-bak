@@ -13,7 +13,6 @@ class LocationPickController extends GetxController {
 
   void onMapCreated(GoogleMapController controller) {
     mapController = controller;
-    
   }
 
   void getCurrentLocation() async {
@@ -30,10 +29,22 @@ class LocationPickController extends GetxController {
       await Future.delayed(Duration(seconds: 1));
     }
     print('${latitude.value} ${longitude.value}');
-    mapController!.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
-        zoom: 18,
-        target: LatLng(selectedPosition.value.latitude,
-            selectedPosition.value.longitude))));
+    updateCamera();
+
+    List<Placemark> placemarks = await placemarkFromCoordinates(
+        userPosition.latitude, userPosition.longitude);
+    addressMaps.value =
+        '${placemarks.first.name}, ${placemarks.first.street}, ${placemarks.first.locality},${placemarks.first.subAdministrativeArea}';
+  }
+
+  void updateCamera() {
+    if (mapController != null) {
+      mapController!.animateCamera(CameraUpdate.newCameraPosition(
+          CameraPosition(
+              zoom: 18,
+              target: LatLng(selectedPosition.value.latitude,
+                  selectedPosition.value.longitude))));
+    }
   }
 
   void onMapTapped(LatLng position) async {
@@ -45,5 +56,6 @@ class LocationPickController extends GetxController {
         await placemarkFromCoordinates(position.latitude, position.longitude);
     addressMaps.value =
         '${placemarks.first.name}, ${placemarks.first.street}, ${placemarks.first.locality},${placemarks.first.subAdministrativeArea}';
+    updateCamera();
   }
 }

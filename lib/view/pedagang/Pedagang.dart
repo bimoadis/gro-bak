@@ -7,6 +7,7 @@ import 'package:gro_bak/services/gps.dart';
 import 'package:gro_bak/services/logout.dart';
 import 'package:gro_bak/repository/getOrders.dart';
 import 'package:gro_bak/view/pedagang/detail_pesanan.dart';
+import 'package:intl/intl.dart';
 
 class Pedagang extends StatefulWidget {
   const Pedagang({Key? key}) : super(key: key);
@@ -157,7 +158,11 @@ class _PedagangState extends State<Pedagang> {
                               style: TextStyle(color: Colors.grey[600]),
                             ),
                             Text(
-                              'Harga: ${data['price']}',
+                              NumberFormat.currency(
+                                      locale: 'id',
+                                      symbol: 'Rp ',
+                                      decimalDigits: 0)
+                                  .format(data['price']),
                               style: TextStyle(color: Colors.grey[600]),
                             ),
                             const SizedBox(height: 10),
