@@ -49,12 +49,12 @@ class _ListRutePageState extends State<ListRutePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('List Rute'),
+        title: const Text('List Rute'),
         centerTitle: true,
       ),
       body: ruteList.isEmpty
-          ? Padding(
-              padding: const EdgeInsets.all(24.0),
+          ?const Padding(
+              padding: EdgeInsets.all(24.0),
               child: Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -75,7 +75,7 @@ class _ListRutePageState extends State<ListRutePage> {
               itemBuilder: (context, index) {
                 var rute = ruteList[index];
                 return Card(
-                  margin: EdgeInsets.all(8.0),
+                  margin: const EdgeInsets.all(8.0),
                   child: ListTile(
                     title: Text('Rute Dagang ${index + 1}.'),
                     subtitle: Text(

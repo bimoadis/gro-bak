@@ -144,7 +144,7 @@ class _RutePedagangState extends State<RutePedagang> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("Rute Pedagang"),
+        title: const Text("Rute Pedagang"),
         centerTitle: true,
       ),
       body: Column(
@@ -170,7 +170,7 @@ class _RutePedagangState extends State<RutePedagang> {
                     myLocationButtonEnabled: false,
                     mapToolbarEnabled: false,
                   )
-                : Center(child: CircularProgressIndicator()),
+                : const Center(child: CircularProgressIndicator()),
           ),
           _buildDetailsContainer()
         ],
@@ -181,7 +181,7 @@ class _RutePedagangState extends State<RutePedagang> {
   void _addInitialMarker(double latitude, double longitude) {
     LatLng initialPosition = LatLng(latitude, longitude);
     Marker marker = Marker(
-      markerId: MarkerId('initial_position'),
+      markerId: const MarkerId('initial_position'),
       position: initialPosition,
       icon: shoppingCartIcon ??
           BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),

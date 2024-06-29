@@ -6,8 +6,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:gro_bak/services/gps.dart';
 import 'package:gro_bak/services/logout.dart';
 import 'package:gro_bak/repository/getOrders.dart';
-import 'package:gro_bak/view/widget/bottom_bar.dart';
-import 'package:gro_bak/view/login.dart';
+import 'package:gro_bak/view/pedagang/detail_pesanan.dart';
 
 class Pedagang extends StatefulWidget {
   const Pedagang({Key? key}) : super(key: key);
@@ -25,6 +24,7 @@ class _PedagangState extends State<Pedagang> {
   late StreamSubscription<List<DocumentSnapshot>> _ordersSubscription;
   List<DocumentSnapshot> _menungguKonfirmasiOrders = [];
   List<DocumentSnapshot> _dikonfirmasiOrders = [];
+  // List<DocumentSnapshot> _allOrders = [];
 
   void _handlePositionStream(Position position) {
     setState(() {
@@ -65,7 +65,9 @@ class _PedagangState extends State<Pedagang> {
     return DefaultTabController(
       length: 2,
       child: Scaffold(
+        backgroundColor: Colors.amber.shade100.withOpacity(0.1),
         appBar: AppBar(
+          backgroundColor: Colors.amber.shade100.withOpacity(0.3),
           title: const Text(
             "Gro-bak",
             style: TextStyle(
@@ -86,12 +88,12 @@ class _PedagangState extends State<Pedagang> {
               onPressed: () {
                 AuthService.logout(context);
               },
-              icon: Icon(
+              icon: const Icon(
                 Icons.logout,
               ),
             ),
           ],
-          bottom: TabBar(
+          bottom: const TabBar(
             tabs: [
               Tab(text: "Pesanan Masuk"),
               Tab(text: "Dikonfirmasi"),
@@ -110,7 +112,7 @@ class _PedagangState extends State<Pedagang> {
 
   Widget _buildOrderList(List<DocumentSnapshot> orders, String status) {
     if (orders.isEmpty) {
-      return Center(child: Text('No orders found'));
+      return const Center(child: Text('No orders found'));
     }
     return Padding(
       padding: const EdgeInsets.all(20.0),
@@ -120,7 +122,7 @@ class _PedagangState extends State<Pedagang> {
           var order = orders[index];
           var data = order.data() as Map<String, dynamic>;
           return Card(
-            margin: EdgeInsets.all(8.0),
+            margin: const EdgeInsets.all(8.0),
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: Column(
@@ -129,11 +131,13 @@ class _PedagangState extends State<Pedagang> {
                     children: [
                       ClipRRect(
                         borderRadius: BorderRadius.circular(8.0),
-                        child: Image.asset(
-                          'assets/images/bakso.jpeg',
-                          width: 120,
-                          height: 90,
-                          fit: BoxFit.cover,
+                        child: Container(
+                          constraints: const BoxConstraints(maxHeight: 130),
+                          child: Image.network(
+                            data['imageURL'],
+                            width: 120,
+                            fit: BoxFit.cover,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 10),
@@ -143,20 +147,52 @@ class _PedagangState extends State<Pedagang> {
                           children: [
                             Text(data['product_name'] ?? 'No Name'),
                             Text(
-                              'Deskripsi: ${data['status']}',
+                              'Deskripsi: ${data['notes']}',
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(color: Colors.grey[600]),
+                            ),
+                            Text(
+                              'Pembeli: ${data['nama_pembeli']}',
                               style: TextStyle(color: Colors.grey[600]),
                             ),
                             Text(
                               'Harga: ${data['price']}',
                               style: TextStyle(color: Colors.grey[600]),
                             ),
-                            SizedBox(height: 10),
+                            const SizedBox(height: 10),
                             if (status == 'Menunggu Konfirmasi')
-                              ElevatedButton(
-                                onPressed: () {
-                                  _updateOrderStatus(order.id, 'Dikonfirmasi');
-                                },
-                                child: Text('Konfirmasi'),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.white),
+                                    onPressed: () {
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => DetailPesanan(
+                                              order: data,
+                                            ),
+                                          ));
+                                    },
+                                    child: const Text('Detail'),
+                                  ),
+                                  const SizedBox(
+                                    width: 5,
+                                  ),
+                                  ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                        backgroundColor: const Color.fromARGB(
+                                            255, 233, 253, 234)),
+                                    onPressed: () {
+                                      _updateOrderStatus(
+                                          order.id, 'Dikonfirmasi');
+                                    },
+                                    child: const Text('Konfirmasi'),
+                                  ),
+                                ],
                               ),
                           ],
                         ),
@@ -170,12 +206,6 @@ class _PedagangState extends State<Pedagang> {
         },
       ),
     );
-  }
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
   }
 
   Future<void> postDetailsToFirestore(double latitude, double longitude) async {
@@ -192,7 +222,7 @@ class _PedagangState extends State<Pedagang> {
   }
 
   void startTimer() {
-    Timer.periodic(Duration(seconds: 20), (timer) {
+    Timer.periodic(const Duration(seconds: 20), (timer) {
       postDetailsToFirestore(
           _userPosition?.latitude ?? 0.0, _userPosition?.longitude ?? 0.0);
     });

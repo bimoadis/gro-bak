@@ -37,7 +37,7 @@ class _ListMenuPesananState extends State<ListMenuPesanan> {
 
   double getAveragePerMenu(int menuIndex) {
     // Ambil semua ratings untuk menu dengan index tertentu
-    List<double> ratings = [];
+    List<num> ratings = [];
 
     widget.ratings?.forEach((data) {
       if (data['produkIndex'] == menuIndex.toString()) {
@@ -64,7 +64,7 @@ class _ListMenuPesananState extends State<ListMenuPesanan> {
         centerTitle: true,
       ),
       body: menuList.isEmpty
-          ? const Center(child: CircularProgressIndicator())
+          ? const Text('penjual ini belum memiliki menu')
           : Padding(
               padding: const EdgeInsets.all(16.0),
               child: ListView.builder(
@@ -139,7 +139,7 @@ class _ListMenuPesananState extends State<ListMenuPesanan> {
                                           itemSize: 20,
                                           initialRating:
                                               getAveragePerMenu(menuIndex),
-                                          minRating: 1,
+                                          minRating: 0,
                                           maxRating: 5,
                                           ignoreGestures: true,
                                           ratingWidget: RatingWidget(

@@ -47,19 +47,18 @@ class _HomeState extends State<Home> {
   }
 
   void _showBottomSheet(
-    String profileImage,
-    String nameMerchant,
-    String name,
-    List<dynamic> seluruhRute,
-    List<dynamic> menu,
-    double latitude,
-    double longitude,
-    String uidPedagang,
-    String uidPembeli,
-    List<Map<String, dynamic>> ratings,
-    List<Map<String, dynamic>> rute,
-    String phone_number
-  ) {
+      String profileImage,
+      String nameMerchant,
+      String name,
+      List<dynamic> seluruhRute,
+      List<dynamic> menu,
+      double latitude,
+      double longitude,
+      String uidPedagang,
+      String uidPembeli,
+      List<Map<String, dynamic>> ratings,
+      List<Map<String, dynamic>> rute,
+      String phone_number) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -125,11 +124,17 @@ class _HomeState extends State<Home> {
                                   _combinedDataFuture.value![index]['uid'],
                                   FirebaseAuth.instance.currentUser!.uid,
                                   _combinedDataFuture.value![index]['ratings']
-                                      .cast<Map<String, dynamic>>(),
+                                          .cast<Map<String, dynamic>>() ??
+                                      [
+                                        {
+                                          'produkIndex': 0,
+                                          'rating': 0,
+                                        }
+                                      ],
                                   _combinedDataFuture.value![index]['rute']
                                       .cast<Map<String, dynamic>>(),
-                                      
-                                  _combinedDataFuture.value![index]['phone_number']);
+                                  _combinedDataFuture.value![index]
+                                      ['phone_number']);
                             },
                             child: Column(
                               children: [
@@ -216,11 +221,13 @@ class _HomeState extends State<Home> {
                                           ),
                                           RatingBar(
                                             itemSize: 20,
-                                            initialRating: _combinedDataFuture
+                                            initialRating: double.parse(
+                                                    _combinedDataFuture
                                                         .value![index]
-                                                    ['average_rating'] ??
+                                                            ['average_rating']
+                                                        .toString()) ??
                                                 0.0,
-                                            minRating: 1,
+                                            minRating: 0,
                                             maxRating: 5,
                                             ignoreGestures: true,
                                             ratingWidget: RatingWidget(

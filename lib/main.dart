@@ -75,9 +75,13 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        useMaterial3: true,
-        // primaryColor: Colors.blue[900],
-      ),
+          useMaterial3: true,
+          colorScheme: ColorScheme.light(
+            primary: Colors.black87,
+            surface: Color.fromARGB(255, 255, 252, 238),
+          )
+          // primaryColor: Colors.blue[900],
+          ),
       home: home,
     );
   }

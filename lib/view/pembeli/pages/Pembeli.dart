@@ -76,6 +76,9 @@ class _PembeliState extends State<Pembeli> {
                 onMapCreated: (GoogleMapController controller) {
                   _controller.complete(controller);
                 },
+                onTap: (LatLng latLng) {
+                  print('Tapped on: $latLng');
+                },
                 myLocationEnabled: true,
                 zoomControlsEnabled: false,
                 compassEnabled: true,

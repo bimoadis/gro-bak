@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:get/get.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:gro_bak/view/pembeli/pages/locationPick.dart';
+import 'package:gro_bak/view/pembeli/pages/location_pick_controller.dart';
 
 class OrderForm extends StatefulWidget {
   final Map<String, dynamic> menu;
@@ -23,18 +29,26 @@ class _OrderFormState extends State<OrderForm> {
   final _formKey = GlobalKey<FormState>();
   String? _address;
   String? _notes;
+  String? _namaPembeli;
   String _deliveryOption = 'Jemput';
   int _quantity = 1; // Jumlah awal item
   late int _totalPrice;
+  LocationPickController locationPickController =
+      Get.put(LocationPickController());
 
   @override
   void initState() {
     super.initState();
     // Set total harga awal
     _totalPrice = int.parse(widget.menu['harga']);
+    locationPickController.getCurrentLocation();
   }
 
   Future<void> createOrder(
+      String addressFromMaps,
+      num latitude,
+      num longitude,
+      String namaPembeli,
       String productName,
       String productDescription,
       String price,
@@ -44,10 +58,14 @@ class _OrderFormState extends State<OrderForm> {
     CollectionReference orderRef =
         FirebaseFirestore.instance.collection('orders');
     await orderRef.add({
+      'nama_pembeli': namaPembeli,
       'product_name': productName,
       'price': price,
       'imageURL': imageURL,
       'address': _address,
+      'address_from_maps': addressFromMaps,
+      'latitude': latitude,
+      'longitude': longitude,
       'notes': _notes,
       'delivery_option': deliveryOption,
       'user_id': widget.uidPembeli,
@@ -130,7 +148,7 @@ class _OrderFormState extends State<OrderForm> {
                                         }
                                       });
                                     },
-                                    icon: Icon(Icons.remove),
+                                    icon: const Icon(Icons.remove),
                                   ),
                                   const SizedBox(width: 6.0),
                                   Text('$_quantity'),
@@ -190,24 +208,81 @@ class _OrderFormState extends State<OrderForm> {
                         ],
                       ),
                       TextFormField(
-                        decoration: const InputDecoration(labelText: 'Alamat'),
+                        decoration:
+                            const InputDecoration(labelText: 'Nama Pembeli'),
                         onSaved: (value) {
-                          _address = value;
+                          _namaPembeli = value;
                         },
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Mohon masukkan alamat';
+                            return 'Mohon masukan nama';
                           }
                           return null;
                         },
                       ),
                       const SizedBox(height: 16),
-                      TextFormField(
-                        decoration: const InputDecoration(labelText: 'Catatan'),
-                        onSaved: (value) {
-                          _notes = value;
-                        },
-                      ),
+                      Obx(() {
+                        print(
+                            '${locationPickController.selectedPosition.value.latitude}');
+                        print(
+                            '${locationPickController.selectedPosition.value.longitude}');
+                        return Column(
+                          children: [
+                            SizedBox(
+                              height: 200,
+                              child: GoogleMap(
+                                markers: {
+                                  Marker(
+                                    markerId: const MarkerId('1'),
+                                    position: locationPickController
+                                        .selectedPosition.value,
+                                  ),
+                                },
+                                myLocationEnabled: true,
+                                onMapCreated:
+                                    locationPickController.onMapCreated,
+                                initialCameraPosition: CameraPosition(
+                                  target: locationPickController
+                                      .selectedPosition.value,
+                                  zoom: 15,
+                                ),
+                                onTap: (argument) => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => LocationPick(),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Text(
+                                'Alamat: ${locationPickController.addressMaps.value}'),
+                            const SizedBox(height: 16),
+                            TextFormField(
+                              decoration: const InputDecoration(
+                                  labelText: 'Detail Alamat'),
+                              onSaved: (value) {
+                                _address = value;
+                              },
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Mohon masukkan alamat';
+                                }
+                                return null;
+                              },
+                            ),
+                            const SizedBox(
+                              height: 10,
+                            ),
+                            TextFormField(
+                              decoration:
+                                  const InputDecoration(labelText: 'Catatan'),
+                              onSaved: (value) {
+                                _notes = value;
+                              },
+                            ),
+                          ],
+                        );
+                      }),
                       const SizedBox(height: 16),
                       DropdownButtonFormField<String>(
                         decoration: const InputDecoration(
@@ -239,6 +314,10 @@ class _OrderFormState extends State<OrderForm> {
                         if (_formKey.currentState!.validate()) {
                           _formKey.currentState!.save();
                           await createOrder(
+                              locationPickController.addressMaps.value,
+                              locationPickController.latitude.value,
+                              locationPickController.longitude.value,
+                              _namaPembeli ?? 'null',
                               widget.menu['nama_produk'],
                               widget.menu['deskripsi_produk'],
                               _totalPrice.toString(),
