@@ -166,27 +166,27 @@ class _PedagangState extends State<Pedagang> {
                               style: TextStyle(color: Colors.grey[600]),
                             ),
                             const SizedBox(height: 10),
-                            if (status == 'Menunggu Konfirmasi')
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  ElevatedButton(
-                                    style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.white),
-                                    onPressed: () {
-                                      Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) => DetailPesanan(
-                                              order: data,
-                                            ),
-                                          ));
-                                    },
-                                    child: const Text('Detail'),
-                                  ),
-                                  const SizedBox(
-                                    width: 5,
-                                  ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.white),
+                                  onPressed: () {
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => DetailPesanan(
+                                            order: data,
+                                          ),
+                                        ));
+                                  },
+                                  child: const Text('Detail'),
+                                ),
+                                const SizedBox(
+                                  width: 5,
+                                ),
+                                if (status == 'Menunggu Konfirmasi')
                                   ElevatedButton(
                                     style: ElevatedButton.styleFrom(
                                         backgroundColor: const Color.fromARGB(
@@ -197,8 +197,8 @@ class _PedagangState extends State<Pedagang> {
                                     },
                                     child: const Text('Konfirmasi'),
                                   ),
-                                ],
-                              ),
+                              ],
+                            ),
                           ],
                         ),
                       ),
